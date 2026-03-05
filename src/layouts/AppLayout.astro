@@ -1,0 +1,85 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  activeTab?: 'map' | 'quests' | 'scan' | 'rewards' | 'profile';
+  showBottomNav?: boolean;
+  fullscreen?: boolean;
+}
+
+const {
+  title = 'WanderQuest',
+  activeTab = 'map',
+  showBottomNav = true,
+  fullscreen = false,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>{title}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Material Icons Round -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+  </head>
+
+  <body class="bg-background-light font-display text-neutral-800 antialiased min-h-screen">
+    <!-- Mobile Frame Container -->
+    <div class={`relative mx-auto ${fullscreen ? 'w-full h-screen' : 'max-w-md min-h-screen'} bg-background-light overflow-hidden`}>
+      <slot />
+
+      {showBottomNav && (
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-surface-light border-t border-neutral-200 pb-6 pt-2 px-4 z-50">
+          <div class="flex justify-between items-center">
+            <!-- Mapa -->
+            <a href="/app" class={`flex flex-col items-center gap-1 p-2 transition-colors ${activeTab === 'map' ? 'text-primary' : 'text-neutral-400 hover:text-neutral-600'}`}>
+              <span class="material-icons-round text-2xl">map</span>
+              <span class="text-[10px] font-medium">Mapa</span>
+            </a>
+
+            <!-- Mis Quests -->
+            <a href="/app" class={`flex flex-col items-center gap-1 p-2 transition-colors ${activeTab === 'quests' ? 'text-primary' : 'text-neutral-400 hover:text-neutral-600'}`}>
+              <span class="material-icons-round text-2xl">flag</span>
+              <span class="text-[10px] font-medium">Mis Quests</span>
+            </a>
+
+            <!-- Escanear (FAB) -->
+            <a href="/app/scan" class="relative -top-4">
+              <div class={`w-16 h-16 rounded-full flex flex-col items-center justify-center shadow-float transition-transform active:scale-95 ${activeTab === 'scan' ? 'bg-primary-dark' : 'bg-primary hover:bg-primary-dark'} text-white`}>
+                <span class="material-icons-round text-2xl">qr_code_scanner</span>
+                <span class="text-[9px] font-bold -mt-0.5">Escanear</span>
+              </div>
+            </a>
+
+            <!-- Billetera -->
+            <a href="/app/wallet" class={`flex flex-col items-center gap-1 p-2 transition-colors ${activeTab === 'rewards' ? 'text-primary' : 'text-neutral-400 hover:text-neutral-600'}`}>
+              <span class="material-icons-round text-2xl">account_balance_wallet</span>
+              <span class="text-[10px] font-medium">Billetera</span>
+            </a>
+
+            <!-- Perfil -->
+            <a href="/app/profile" class={`flex flex-col items-center gap-1 p-2 transition-colors ${activeTab === 'profile' ? 'text-primary' : 'text-neutral-400 hover:text-neutral-600'}`}>
+              <span class="material-icons-round text-2xl">person</span>
+              <span class="text-[10px] font-medium">Perfil</span>
+            </a>
+          </div>
+        </nav>
+      )}
+    </div>
+
+    <!-- Desktop background hint -->
+    <div class="fixed inset-0 -z-10 bg-neutral-200 hidden md:flex flex-col items-center justify-center pointer-events-none gap-4">
+      <img src="/wanderquest-logo.png" alt="WanderQuest" class="w-16 h-16 opacity-50" />
+      <div class="text-neutral-400 text-sm font-medium">WanderQuest App Preview</div>
+    </div>
+  </body>
+</html>

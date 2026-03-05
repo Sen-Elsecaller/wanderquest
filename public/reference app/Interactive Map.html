@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>WanderQuest - Map Home</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                    "primary": "#088eaf",
+                    "primary-dark": "#066c85",
+                    "primary-light": "#e0f2f6",
+                    "background-light": "#f5f8f8",
+                    "background-dark": "#101f22",
+                    "neutral-50": "#f5f8f8",
+                    "neutral-100": "#eaf2f4",
+                    "neutral-200": "#d5e3e6",
+                    "neutral-300": "#b0c8ce",
+                    "neutral-400": "#8aaeb6",
+                    "neutral-500": "#6b929c",
+                    "neutral-600": "#52757e",
+                    "neutral-700": "#415d64",
+                    "neutral-800": "#33494e",
+                    "neutral-900": "#2a3c40",
+                    "coral": "#ff7e67",
+                    "gold": "#ffb703",
+                },
+                fontFamily: {
+                    "display": ["Plus Jakarta Sans", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                boxShadow: {
+                    'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                    'float': '0 10px 40px -10px rgba(8, 142, 175, 0.3)',
+                }
+            },
+            },
+        }
+    </script>
+<style>
+        /* Custom animations not supported by default Tailwind utilities */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        .animate-pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Simulated Map Pattern */
+        .bg-map-pattern {
+            background-color: #eaf2f4;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.4) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(255,255,255,0.4) 2px, transparent 2px),
+                linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
+            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+            background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+        }
+
+        .clip-arrow-bottom {
+            clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 55% 85%, 50% 100%, 45% 85%, 0% 85%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-neutral-800 dark:text-neutral-100 font-display antialiased h-screen w-full overflow-hidden select-none">
+<!-- Screen Container -->
+<div class="relative w-full h-full max-w-md mx-auto bg-neutral-200 dark:bg-neutral-800 overflow-hidden shadow-2xl">
+<!-- MAP LAYER -->
+<!-- In a real app this would be a map canvas. Here we simulate it with a styled div and SVG paths for roads/blocks -->
+<div class="absolute inset-0 z-0 bg-map-pattern overflow-hidden">
+<!-- Simulated city blocks/parks -->
+<div class="absolute top-[-10%] left-[-20%] w-[140%] h-[140%] opacity-40 pointer-events-none">
+<!-- Park -->
+<div class="absolute top-[30%] left-[40%] w-64 h-48 bg-emerald-100/50 rounded-3xl transform rotate-12"></div>
+<!-- River -->
+<div class="absolute top-[0%] right-[20%] w-24 h-[120%] bg-blue-100/50 transform -rotate-6 border-l-4 border-blue-200/30"></div>
+<!-- Block -->
+<div class="absolute bottom-[20%] left-[10%] w-56 h-56 bg-white/40 rounded-xl"></div>
+<!-- Block -->
+<div class="absolute top-[15%] right-[5%] w-40 h-80 bg-white/40 rounded-xl"></div>
+</div>
+<!-- Current Location Marker -->
+<div class="absolute top-[55%] left-[48%] transform -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center">
+<div class="absolute w-12 h-12 bg-primary/30 rounded-full animate-pulse-ring"></div>
+<div class="w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-primary z-20">
+<div class="w-2.5 h-2.5 bg-primary rounded-full"></div>
+</div>
+<!-- Direction Cone -->
+<div class="absolute w-20 h-20 bg-gradient-to-t from-primary/20 to-transparent rounded-full transform -translate-y-6 clip-path-cone opacity-50 rotate-45 pointer-events-none" style="clip-path: polygon(50% 50%, 0 0, 100% 0);"></div>
+</div>
+<!-- Quest Markers -->
+<!-- 1. Regular Quest (Teal) -->
+<div class="absolute top-[35%] left-[25%] transform -translate-x-1/2 -translate-y-full z-10 flex flex-col items-center group cursor-pointer">
+<div class="bg-primary text-white p-2 rounded-full shadow-lg transform transition-transform hover:scale-110 hover:-translate-y-1">
+<span class="material-icons-round text-lg">museum</span>
+</div>
+<div class="w-2 h-2 bg-primary rotate-45 transform -translate-y-1.5 rounded-[1px]"></div>
+<div class="absolute top-full mt-1 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[10px] font-bold text-primary shadow-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    Art Exhibit
+                </div>
+</div>
+<!-- 2. Regular Quest (Teal) -->
+<div class="absolute top-[42%] right-[15%] transform -translate-x-1/2 -translate-y-full z-10 flex flex-col items-center group cursor-pointer">
+<div class="bg-primary text-white p-2 rounded-full shadow-lg transform transition-transform hover:scale-110 hover:-translate-y-1">
+<span class="material-icons-round text-lg">restaurant</span>
+</div>
+<div class="w-2 h-2 bg-primary rotate-45 transform -translate-y-1.5 rounded-[1px]"></div>
+</div>
+<!-- 3. Limited Time Quest (Coral) -->
+<div class="absolute top-[20%] left-[60%] transform -translate-x-1/2 -translate-y-full z-10 flex flex-col items-center group cursor-pointer">
+<!-- Timer Badge -->
+<div class="absolute -top-3 bg-neutral-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-20">
+                    14:00
+                </div>
+<div class="bg-coral text-white w-10 h-10 flex items-center justify-center rounded-xl shadow-lg transform rotate-45 border-2 border-white transition-transform hover:scale-110 hover:-translate-y-1">
+<span class="material-icons-round text-lg transform -rotate-45">bolt</span>
+</div>
+<!-- Shadow dot -->
+<div class="w-3 h-1 bg-neutral-900/20 rounded-full mt-2 blur-[1px]"></div>
+</div>
+<!-- 4. Narrative Quest (Gold) -->
+<div class="absolute bottom-[35%] left-[20%] transform -translate-x-1/2 -translate-y-full z-10 flex flex-col items-center group cursor-pointer">
+<div class="relative">
+<div class="absolute inset-0 bg-gold blur-md opacity-40 rounded-full animate-pulse"></div>
+<div class="bg-gradient-to-br from-yellow-300 to-gold text-neutral-900 p-2.5 rounded-full shadow-xl border-2 border-white relative z-10 transform transition-transform hover:scale-110 hover:-translate-y-1">
+<span class="material-icons-round text-xl">auto_stories</span>
+</div>
+</div>
+<div class="w-1 h-4 bg-neutral-800/50 rounded-full mt-1"></div>
+</div>
+</div>
+<!-- TOP BAR (Floating) -->
+<div class="absolute top-0 left-0 w-full z-30 pt-12 px-4 pb-4 bg-gradient-to-b from-white/90 via-white/60 to-transparent backdrop-blur-[2px]">
+<div class="flex items-center gap-3">
+<!-- Logo -->
+<div class="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center text-primary shrink-0">
+<span class="material-icons-round text-2xl">explore</span>
+</div>
+<!-- Search Bar -->
+<div class="flex-1 h-12 bg-white/90 backdrop-blur-md shadow-glass rounded-full flex items-center px-4 gap-2 border border-white/50">
+<span class="material-icons-round text-neutral-400">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-neutral-700 placeholder-neutral-400 text-sm w-full font-medium" placeholder="Buscar quests..." type="text"/>
+</div>
+<!-- Profile -->
+<div class="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-primary to-primary-light shadow-sm shrink-0 cursor-pointer overflow-hidden">
+<img class="w-full h-full object-cover rounded-full border-2 border-white" data-alt="Profile picture of a young woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1levMys4P5nfUkFkqZYa-HS0atQjQiZiCDmz7Ao-Ktdm-5kLHeb4YFBTWTxFpOjMA0kXXloIUAaljtmT9yFPMV1sJABAYUQW3t6hjzkN3S6j0hk9MgqxDxf-pDANpue5hGTyLqKg5yy4eO-4R8oPeefx9SYLtm1m0BDvaU_Xw8_36pOIIbxz6BDaqfXXCmt9cEs194CPM-rO8BZ8yS0AOMxfS4tiRIGPtk7wv6mMw15seGUp3aoECYu5MvMO9Ym1feqjB-F0mJgO5"/>
+</div>
+</div>
+<!-- Filters / Chips -->
+<div class="flex gap-2 mt-3 overflow-x-auto hide-scrollbar pl-1 pb-1">
+<button class="px-4 py-1.5 bg-primary text-white text-xs font-semibold rounded-full shadow-md whitespace-nowrap">Todos</button>
+<button class="px-4 py-1.5 bg-white/90 backdrop-blur-md text-neutral-600 text-xs font-semibold rounded-full shadow-sm border border-white whitespace-nowrap">Narrativa</button>
+<button class="px-4 py-1.5 bg-white/90 backdrop-blur-md text-neutral-600 text-xs font-semibold rounded-full shadow-sm border border-white whitespace-nowrap">Limitados</button>
+<button class="px-4 py-1.5 bg-white/90 backdrop-blur-md text-neutral-600 text-xs font-semibold rounded-full shadow-sm border border-white whitespace-nowrap">Crypto</button>
+</div>
+</div>
+<!-- BOTTOM SHEET (Draggable Area) -->
+<div class="absolute bottom-[90px] left-0 w-full z-30 flex flex-col justify-end pointer-events-none">
+<!-- Card Container -->
+<div class="w-full px-4 pb-4 pointer-events-auto">
+<div class="flex items-center justify-between mb-3 px-1">
+<h2 class="text-neutral-800 font-bold text-lg drop-shadow-sm shadow-white">Cerca de ti</h2>
+<a class="text-xs font-bold text-primary bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm" href="#">Ver todo</a>
+</div>
+<!-- Horizontal Scroll Cards -->
+<div class="flex overflow-x-auto gap-4 hide-scrollbar pb-2 snap-x snap-mandatory">
+<!-- Card 1 -->
+<div class="bg-white dark:bg-neutral-800 rounded-[2rem] p-3 shadow-glass w-[85%] sm:w-[280px] shrink-0 snap-center border border-white/50 flex gap-3 items-center">
+<div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="Close up of colorful street graffiti art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCg6OCICz9FNt4ZJVsHfoUqZePy-aTuMUaKekT4ZZOHs6auCjcw-gM9TUW1XEadSN21aMDFe4vpupQ_JRAg5fFGKWpz2cynHhoZG59zAI4FOvcYG29Ab1hfR-VHMhWXpERIoI0KtC0-uv1SGWee8_VV1hgdfHPLR-0ns21gsxhL1HhfTNotRtql02vc3oznQh63vfI5YKFio_kNWtXjsSWUf-HozqtrGIl0UpQxHp1Hiv35ZLA3aKN0lxuflUJfBOl3R5ffUle9zEzy"/>
+<div class="absolute top-1 left-1 bg-black/50 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+<span class="text-[10px] font-bold text-white">Art</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<h3 class="font-bold text-neutral-800 dark:text-white truncate">Street Art Hunt</h3>
+<div class="flex items-center text-xs text-neutral-500 mt-1 mb-2">
+<span class="material-icons-round text-[14px] mr-1">place</span>
+                                250m
+                            </div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-full">
+<span class="material-icons-round text-primary text-[14px]">token</span>
+<span class="text-xs font-bold text-primary">20 WQ</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white dark:bg-neutral-800 rounded-[2rem] p-3 shadow-glass w-[85%] sm:w-[280px] shrink-0 snap-center border border-white/50 flex gap-3 items-center">
+<div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="Historic cathedral with tall spires against a blue sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF7bylqxS5Bp8qnkJaHceF26JhsgqeSpPK5H5Bxyrw_zT24ze9utChXqP0_asAIbwg-MTGocvlkoRhcG9TFLoCtiNUPQy7BAXaL32Xpk8MiyAeDoggbxkvW5xKYbAWWOR_kE9TBWgNlkk7UOdpQGlP1nYn_KCgss9Z7uiIo5z34rRtW6YHMWb3Vo7p9dx5Bg6HsZZOL-b5ZdU-iBmlAap3SXFf_rzaC_iryrC_zgm1iJjhAIv9_-Rxc9X0HL4zwmvqnXjcqhw7UaSQ"/>
+<div class="absolute top-1 left-1 bg-black/50 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+<span class="text-[10px] font-bold text-white">History</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<h3 class="font-bold text-neutral-800 dark:text-white truncate">Centro Histórico</h3>
+<div class="flex items-center text-xs text-neutral-500 mt-1 mb-2">
+<span class="material-icons-round text-[14px] mr-1">place</span>
+                                500m
+                            </div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-full">
+<span class="material-icons-round text-primary text-[14px]">token</span>
+<span class="text-xs font-bold text-primary">50 WQ</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white dark:bg-neutral-800 rounded-[2rem] p-3 shadow-glass w-[85%] sm:w-[280px] shrink-0 snap-center border border-white/50 flex gap-3 items-center">
+<div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 relative">
+<img class="w-full h-full object-cover" data-alt="Crowd of people at an outdoor festival event" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuJSCWcqsoCx_x-5sHgLsCdWXqb4jKzNtl15Tn8ZyR_qE5tISE29gfhcMXl9x6PO3ms9qSBm1w8iCgwlZSyUCCeGQYyJmJsGMzN9ffjPElh8hdrKvdY6ESpCJjeQn_CpDQAi8bO4UMSdpH43H9rbbbGaZ8LeMYOQ4bpah_uD11irAgdWJWTq8aD_Dt7RPD8xFGM2N6RdTr1du6yZGrDiCed-0Ih498LEbmQBxNHV7lWLdi0o4lCWuGKlX23CHyi9kLotkbvPtzgfBP"/>
+<div class="absolute top-1 left-1 bg-coral/90 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+<span class="text-[10px] font-bold text-white">Event</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<h3 class="font-bold text-neutral-800 dark:text-white truncate">Flash Mob</h3>
+<div class="flex items-center text-xs text-neutral-500 mt-1 mb-2">
+<span class="material-icons-round text-[14px] mr-1">timer</span>
+                                14:00 left
+                            </div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-full">
+<span class="material-icons-round text-primary text-[14px]">token</span>
+<span class="text-xs font-bold text-primary">100 WQ</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- BOTTOM NAVIGATION -->
+<!-- Custom shape with SVG-like curve simulation using CSS or absolute positioning -->
+<div class="absolute bottom-0 left-0 w-full h-[90px] z-40 pointer-events-none">
+<!-- Nav Background -->
+<div class="absolute bottom-0 w-full h-[80px] bg-white dark:bg-neutral-900 rounded-t-[2rem] shadow-[0_-5px_20px_rgba(0,0,0,0.05)] pointer-events-auto flex justify-between items-center px-2">
+<!-- Left Group -->
+<div class="flex items-center justify-around w-[40%] pl-2">
+<button class="flex flex-col items-center justify-center gap-1 p-2 text-primary">
+<span class="material-icons-round text-2xl">map</span>
+<span class="text-[10px] font-bold">Mapa</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-2 text-neutral-400 hover:text-neutral-600 transition-colors">
+<span class="material-icons-round text-2xl">flag</span>
+<span class="text-[10px] font-medium">Mis Quests</span>
+</button>
+</div>
+<!-- Right Group -->
+<div class="flex items-center justify-around w-[40%] pr-2">
+<button class="flex flex-col items-center justify-center gap-1 p-2 text-neutral-400 hover:text-neutral-600 transition-colors">
+<span class="material-icons-round text-2xl">emoji_events</span>
+<span class="text-[10px] font-medium">Premios</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-2 text-neutral-400 hover:text-neutral-600 transition-colors">
+<span class="material-icons-round text-2xl">person</span>
+<span class="text-[10px] font-medium">Perfil</span>
+</button>
+</div>
+</div>
+<!-- Floating Scan Button (FAB) -->
+<div class="absolute left-1/2 -top-1 transform -translate-x-1/2 pointer-events-auto group">
+<!-- Outer Ring/Outline for integration effect -->
+<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[76px] h-[76px] bg-neutral-100 dark:bg-neutral-800 rounded-full"></div>
+<!-- Button -->
+<button class="relative w-16 h-16 rounded-full bg-primary shadow-float flex flex-col items-center justify-center text-white transition-transform transform active:scale-95 group-hover:scale-105">
+<div class="absolute inset-0 rounded-full border border-white/20"></div>
+<span class="material-icons-round text-3xl">qr_code_scanner</span>
+<span class="text-[9px] font-bold mt-[-2px]">Escanear</span>
+<!-- Pulse Effect inside button -->
+<span class="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-coral opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-coral"></span>
+</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Background Decoration to show phone frame context if viewed on desktop -->
+<div class="fixed inset-0 -z-10 bg-neutral-200 flex items-center justify-center pointer-events-none">
+<div class="text-neutral-400 text-sm font-medium">WanderQuest Mobile View</div>
+</div>
+</body></html>

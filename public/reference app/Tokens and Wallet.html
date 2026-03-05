@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WanderQuest Rewards Wallet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#088eaf",
+                        "primary-dark": "#066a83",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#101f22",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#162a2e",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem", 
+                        "lg": "2rem", 
+                        "xl": "2.5rem", 
+                        "2xl": "3rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "soft": "0 10px 40px -10px rgba(8, 142, 175, 0.15)",
+                        "card": "0 4px 20px -5px rgba(0, 0, 0, 0.05)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-100 antialiased selection:bg-primary/30">
+<div class="mx-auto max-w-md min-h-screen relative flex flex-col pb-24">
+<!-- Header -->
+<header class="px-6 pt-8 pb-4 flex justify-between items-center sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-white">Mi Billetera</h1>
+<p class="text-sm text-slate-500 dark:text-slate-400 font-medium">WanderQuest</p>
+</div>
+<button class="p-2 rounded-full bg-surface-light dark:bg-surface-dark shadow-sm border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300">
+<span class="material-icons">notifications_none</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="flex-1 px-6 space-y-8">
+<!-- Balance Card -->
+<section class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary to-primary-dark shadow-soft text-white p-6">
+<!-- Abstract Pattern Background -->
+<div class="absolute top-0 right-0 -mr-8 -mt-8 w-48 h-48 rounded-full bg-white/10 blur-3xl"></div>
+<div class="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 rounded-full bg-black/10 blur-2xl"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-6">
+<div class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10 flex items-center space-x-2">
+<span class="material-icons text-sm">account_balance_wallet</span>
+<span class="text-xs font-semibold tracking-wide">STELLAR NETWORK</span>
+</div>
+<span class="material-icons opacity-80">qr_code_scanner</span>
+</div>
+<div class="space-y-1 mb-6">
+<h2 class="text-5xl font-bold tracking-tight">1,250 <span class="text-2xl font-medium opacity-80">WQ</span></h2>
+<p class="text-lg opacity-80 font-medium">≈ $12.500 CLP</p>
+</div>
+<div class="flex items-center justify-between bg-black/20 rounded-lg p-3 backdrop-blur-md border border-white/5">
+<div class="flex items-center space-x-2 overflow-hidden">
+<span class="material-icons text-sm opacity-70">link</span>
+<span class="font-mono text-sm opacity-90 truncate">GDA...7X2</span>
+</div>
+<button class="text-xs font-bold bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-full">
+                            COPIAR
+                        </button>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<section class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-center justify-center gap-2 bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-card active:scale-95 transition-transform group">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+<span class="material-icons text-primary">download</span>
+</div>
+<span class="font-bold text-slate-700 dark:text-slate-200">Depositar</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-2 bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-card active:scale-95 transition-transform group">
+<div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
+<span class="material-icons text-slate-600 dark:text-slate-300">upload</span>
+</div>
+<span class="font-bold text-slate-700 dark:text-slate-200">Retirar</span>
+</button>
+</section>
+<!-- Map Section -->
+<section>
+<div class="flex justify-between items-end mb-4">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Dónde canjear</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Socios cercanos a ti</p>
+</div>
+<button class="text-primary text-sm font-bold flex items-center hover:opacity-80">
+                        Ver mapa <span class="material-icons text-sm ml-1">arrow_forward</span>
+</button>
+</div>
+<div class="relative h-48 rounded-xl overflow-hidden shadow-card group cursor-pointer">
+<!-- Map Image Placeholder -->
+<img alt="Map view of Santiago streets with location pins" class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500" data-location="Santiago, Chile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-C-cq-fqE9ivinf3k1acnBC3vy8v1G7AGYy4wjMYcHmi0UrSxn9NAHJ2peWmaxvszh910cEdp11BOu39x2BqkdjDE6cCDhoZX9_TrCLf6bMfJmRe76bMFrFK-FWdrHSTcsZqw2PuCI024KR2Gq4eSRGFVQepam4tM3vZ4ivB1kTDJa3r2VjXpPgBqnqnk9VBGJv84q-PXyjdVH8XqI2yqJrw0LL2YujbfmRQD_ezSKghTOQPyEgIPul8DrcY55N1WtFeevh5rBgDM"/>
+<!-- Overlay Gradient -->
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/60 to-transparent pointer-events-none"></div>
+<!-- Floating Pins (Simulated) -->
+<div class="absolute top-1/3 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
+<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg border-2 border-white animate-bounce">
+<span class="material-icons text-white text-xs">local_cafe</span>
+</div>
+</div>
+<div class="absolute bottom-1/3 right-1/3 transform -translate-x-1/2 -translate-y-1/2">
+<div class="w-8 h-8 bg-white dark:bg-surface-dark rounded-full flex items-center justify-center shadow-lg text-primary">
+<span class="material-icons text-xs">restaurant</span>
+</div>
+</div>
+<div class="absolute bottom-3 left-3 bg-white/90 dark:bg-surface-dark/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1">
+<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        3 socios a &lt; 500m
+                    </div>
+</div>
+</section>
+<!-- Partners Carousel -->
+<section>
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Ofertas destacadas</h3>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 hide-scrollbar -mx-6 px-6">
+<!-- Partner Card 1 -->
+<div class="flex-none w-64 bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-card border border-slate-100 dark:border-slate-800 relative group overflow-hidden">
+<div class="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl z-10">
+                            -10%
+                        </div>
+<div class="flex items-center gap-3 mb-3">
+<img alt="Cafe logo showing a coffee cup" class="w-12 h-12 rounded-full object-cover border-2 border-slate-100 dark:border-slate-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdfXYLXwA_e-WO7LaQu2esIfsk4UC06HJ6D2blwV39zZWlgbjT3af-AtRmB9UXxJkVagB25JdhilRa913JA79Kh9sT2JSD7jqdX-AURRWaXFRIvFJ8RoX4JtYu64F7wh_DHflCZMhoaIj6dMS122imz8YF6cgU6FEw-28WWOPUY5JSCsNatnWzV5rhp9VzG_DRzmlI8ueFsgIoNbkxmglHvH4B-2eOI15vvD7a3MPRRHhCrYOhAoLOJqGoWSbrCO8aLbLAeQrIR8xL"/>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white leading-tight">Café Altura</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Cafetería de especialidad</p>
+</div>
+</div>
+<div class="flex justify-between items-center mt-2">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-300">Todo el menú</span>
+<button class="bg-primary/10 hover:bg-primary text-primary hover:text-white px-3 py-1.5 rounded-full text-xs font-bold transition-all">
+                                200 WQ
+                            </button>
+</div>
+</div>
+<!-- Partner Card 2 -->
+<div class="flex-none w-64 bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-card border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+<div class="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl z-10">
+                           2x1
+                       </div>
+<div class="flex items-center gap-3 mb-3">
+<img alt="Restaurant logo showing a fork and knife" class="w-12 h-12 rounded-full object-cover border-2 border-slate-100 dark:border-slate-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZO6VVBQp9Py5gtLXRU_4dVufNmQmA_P0IDGadHP64bIF8cNizPhITxRJUJ5eFFuFw0vovSJZkIYCxpWsveW6F-lXqY_VJCpzIhdtyTN_En3uG8bCqMy4OXuElsBKa-5CXgaaz_zrFiyxUcgR_xMRgga4jqRk-Jj-9HZkToZh34kOGnfs_IiaNvKzfXPxSSm6z3Uz6SqEXvTKnx9-bSsW-HZtWBfQ4hFKc6a4BV404jnLgKzWMOwL3gbhiidqCqfrulKN0z-913Zk4"/>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white leading-tight">La Mechada</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Sandwicheria</p>
+</div>
+</div>
+<div class="flex justify-between items-center mt-2">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-300">Sandwich clásico</span>
+<button class="bg-primary/10 hover:bg-primary text-primary hover:text-white px-3 py-1.5 rounded-full text-xs font-bold transition-all">
+                               450 WQ
+                           </button>
+</div>
+</div>
+<!-- Partner Card 3 -->
+<div class="flex-none w-64 bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-card border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+<span class="material-icons text-slate-400">storefront</span>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white leading-tight">Ver más</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Explora el catálogo</p>
+</div>
+</div>
+<div class="flex justify-between items-center mt-2">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-300">15+ Socios</span>
+<button class="bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-full text-xs font-bold">
+<span class="material-icons text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Transaction History -->
+<section>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Historial reciente</h3>
+<div class="space-y-3">
+<!-- Item 1: Earning -->
+<div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/50 dark:hover:bg-black/20 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-icons text-xl">emoji_events</span>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-slate-100 text-sm">Found Secret Spot</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Plaza de Armas • Hoy, 10:30 AM</p>
+</div>
+</div>
+<span class="font-bold text-green-600 dark:text-green-400 text-sm">+50 WQ</span>
+</div>
+<!-- Item 2: Redemption -->
+<div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/50 dark:hover:bg-black/20 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+<span class="material-icons text-xl">local_offer</span>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-slate-100 text-sm">Redeemed @ Café Altura</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Promo 10% • Ayer, 4:15 PM</p>
+</div>
+</div>
+<span class="font-bold text-slate-900 dark:text-slate-100 text-sm">-100 WQ</span>
+</div>
+<!-- Item 3: Earning -->
+<div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/50 dark:hover:bg-black/20 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-icons text-xl">explore</span>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-slate-100 text-sm">Exploration Reward</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Barrio Lastarria • 22 Ago</p>
+</div>
+</div>
+<span class="font-bold text-green-600 dark:text-green-400 text-sm">+25 WQ</span>
+</div>
+</div>
+<button class="w-full mt-4 py-2 text-center text-sm font-bold text-primary dark:text-primary/80 hover:underline">
+                    Ver todo el historial
+                </button>
+</section>
+</main>
+<!-- Bottom Navigation (Fixed) -->
+<nav class="fixed bottom-0 left-0 right-0 bg-surface-light dark:bg-surface-dark border-t border-slate-200 dark:border-slate-800 pb-6 pt-2 px-6 z-50">
+<div class="flex justify-between items-center max-w-md mx-auto">
+<button class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">map</span>
+<span class="text-[10px] font-medium">Explorar</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">camera_alt</span>
+<span class="text-[10px] font-medium">Scan</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-primary">
+<div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center -mt-4 border-4 border-background-light dark:border-background-dark">
+<span class="material-icons text-primary">account_balance_wallet</span>
+</div>
+<span class="text-[10px] font-bold">Wallet</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">leaderboard</span>
+<span class="text-[10px] font-medium">Ranking</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">person</span>
+<span class="text-[10px] font-medium">Perfil</span>
+</button>
+</div>
+</nav>
+</div>
+</body></html>

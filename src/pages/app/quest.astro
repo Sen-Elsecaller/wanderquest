@@ -1,0 +1,200 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="WanderQuest - Quest" showBottomNav={false}>
+  <div class="relative min-h-screen bg-white pb-24">
+    <!-- Sticky Header -->
+    <header class="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-6 pt-12">
+      <a href="/app" class="w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-colors">
+        <span class="material-icons-round">arrow_back</span>
+      </a>
+      <button class="w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-colors">
+        <span class="material-icons-round">ios_share</span>
+      </button>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="relative h-[45vh] w-full">
+      <div class="absolute inset-0 bg-gradient-to-t from-neutral-900/80 via-transparent to-transparent z-10"></div>
+
+      <!-- Hero Image -->
+      <img
+        src="/cerro-santa-lucia-small.png"
+        alt="Cerro Santa Lucía"
+        class="w-full h-full object-cover"
+      />
+
+      <!-- Hero Content -->
+      <div class="absolute bottom-0 left-0 right-0 p-6 z-20">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="bg-primary/90 backdrop-blur text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
+            Quest Narrativa
+          </span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-white leading-tight mb-4 drop-shadow-lg">
+          Cerro Santa Lucia
+        </h1>
+
+        <!-- Quick Stats Row -->
+        <div class="flex items-center gap-4 text-white/90 text-sm font-medium backdrop-blur-sm bg-black/20 p-3 rounded-2xl border border-white/10">
+          <div class="flex items-center gap-1.5">
+            <span class="material-icons-round text-primary text-base">place</span>
+            <span>1.2km</span>
+          </div>
+          <div class="w-px h-4 bg-white/20"></div>
+          <div class="flex items-center gap-1">
+            <span class="material-icons-round text-gold text-base">star</span>
+            <div class="flex gap-0.5">
+              <div class="w-2 h-2 rounded-full bg-white"></div>
+              <div class="w-2 h-2 rounded-full bg-white"></div>
+              <div class="w-2 h-2 rounded-full bg-white/30"></div>
+            </div>
+          </div>
+          <div class="w-px h-4 bg-white/20"></div>
+          <div class="flex items-center gap-1.5 text-white">
+            <span class="material-icons-round text-base">schedule</span>
+            <span>30 min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="px-6 py-6 space-y-8 bg-background-light -mt-6 rounded-t-3xl relative z-20">
+      <!-- Pull Bar -->
+      <div class="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto mb-2 opacity-50"></div>
+
+      <!-- Reward Highlight (Sponsored) -->
+      <div class="bg-white rounded-2xl shadow-sm border border-neutral-100 overflow-hidden">
+        <!-- Sponsor Header -->
+        <div class="flex items-center gap-3 px-4 py-3 bg-amber-50 border-b border-amber-100">
+          <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+            <span class="material-icons-round text-amber-600 text-sm">local_cafe</span>
+          </div>
+          <p class="text-xs font-bold text-amber-800 uppercase tracking-wide">Patrocinado por Café Altura</p>
+        </div>
+        <!-- Reward Content -->
+        <div class="flex items-center justify-between p-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <span class="material-icons-round text-primary">diamond</span>
+            </div>
+            <div>
+              <p class="text-xs text-neutral-500 font-medium uppercase tracking-wider">Recompensa</p>
+              <p class="text-lg font-bold text-primary">50 WQ Tokens</p>
+            </div>
+          </div>
+          <div class="h-8 w-px bg-neutral-200"></div>
+          <div class="text-right">
+            <p class="text-xs text-neutral-500">Valor aprox.</p>
+            <p class="text-sm font-semibold text-neutral-700">~$5.000 CLP</p>
+          </div>
+        </div>
+        <!-- Bonus Badge -->
+        <div class="px-4 pb-4">
+          <div class="flex items-center gap-2 bg-coral/10 text-coral px-3 py-2 rounded-lg">
+            <span class="material-icons-round text-sm">card_giftcard</span>
+            <span class="text-xs font-bold">+10% extra en Café Altura al completar</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Narrative Hook -->
+      <div>
+        <h2 class="text-lg font-bold text-neutral-900 mb-2">Los Susurros de la Fortaleza</h2>
+        <p class="text-neutral-600 leading-relaxed text-sm">
+          Descubre los secretos escondidos entre los muros de la antigua fortaleza. Los fantasmas de la conquista aun susurran cerca de la Fuente Neptuno. ¿Estas listo para descubrir la verdad detras de la fundacion de Santiago?
+          <button class="text-primary font-bold ml-1 hover:underline">Leer mas</button>
+        </p>
+      </div>
+
+      <!-- Progress Tracker -->
+      <div class="space-y-3">
+        <div class="flex justify-between items-end">
+          <h3 class="text-base font-bold text-neutral-900">Progreso de la Ruta</h3>
+          <span class="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">Paso 2 de 5</span>
+        </div>
+        <div class="h-2.5 w-full bg-neutral-200 rounded-full overflow-hidden">
+          <div class="h-full bg-primary w-2/5 rounded-full relative">
+            <div class="absolute right-0 top-0 bottom-0 w-2 bg-white/30 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Requirements Checklist -->
+      <div class="space-y-4">
+        <h3 class="text-base font-bold text-neutral-900">Requisitos</h3>
+        <div class="bg-white rounded-2xl p-1 shadow-sm border border-neutral-100">
+          <!-- Item 1: Done -->
+          <div class="flex items-center gap-4 p-3 border-b border-neutral-100">
+            <div class="flex-shrink-0">
+              <span class="material-icons-round text-primary text-xl">check_circle</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-neutral-900 line-through decoration-primary decoration-2 opacity-60">Llegar al lugar</p>
+            </div>
+            <span class="text-xs text-neutral-400 font-medium">Listo</span>
+          </div>
+
+          <!-- Item 2: Active -->
+          <div class="flex items-center gap-4 p-3 bg-primary/5 rounded-xl">
+            <div class="flex-shrink-0">
+              <span class="material-icons-round text-primary text-xl animate-pulse">qr_code_scanner</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-neutral-900">Escanear codigo QR oculto</p>
+              <p class="text-xs text-primary mt-0.5">Cerca de la Fuente Neptuno</p>
+            </div>
+            <a href="/app/scan" class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center hover:bg-neutral-50 transition-colors">
+              <span class="material-icons-round text-primary text-sm">arrow_forward</span>
+            </a>
+          </div>
+
+          <!-- Item 3: Pending -->
+          <div class="flex items-center gap-4 p-3 opacity-60">
+            <div class="flex-shrink-0">
+              <span class="material-icons-round text-neutral-400 text-xl">radio_button_unchecked</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-neutral-700">Foto de la estatua</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sponsor Info Card -->
+      <div>
+        <h3 class="text-base font-bold text-neutral-900 mb-3">Sobre el Sponsor</h3>
+        <div class="relative bg-white rounded-2xl overflow-hidden shadow-sm border border-neutral-100 group">
+          <div class="flex">
+            <div class="w-24 h-auto relative bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
+              <span class="material-icons-round text-amber-600 text-3xl">local_cafe</span>
+            </div>
+            <div class="flex-1 p-4">
+              <div class="flex justify-between items-start mb-1">
+                <h4 class="font-bold text-neutral-900">Café Altura</h4>
+                <span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Sponsor</span>
+              </div>
+              <p class="text-xs text-neutral-500 mb-2">Cafetería de especialidad · A 200m de la meta</p>
+              <p class="text-sm text-neutral-600">Este comercio financia tu recompensa a cambio de tu visita verificada.</p>
+            </div>
+          </div>
+          <!-- Decorative corner -->
+          <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full pointer-events-none"></div>
+        </div>
+      </div>
+
+      <!-- Extra padding for scroll -->
+      <div class="h-8"></div>
+    </div>
+
+    <!-- Sticky Bottom CTA -->
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-gradient-to-t from-white via-white to-transparent pt-12 z-30 pointer-events-none">
+      <a href="/app/scan" class="pointer-events-auto w-full bg-primary hover:bg-primary-dark text-white font-bold text-lg py-4 rounded-full shadow-xl shadow-primary/30 flex items-center justify-center gap-2 transform active:scale-[0.98] transition-all">
+        <span>Iniciar Quest</span>
+        <span class="material-icons-round text-xl">play_arrow</span>
+      </a>
+    </div>
+  </div>
+</AppLayout>

@@ -1,0 +1,93 @@
+---
+const steps = [
+  {
+    number: '01',
+    icon: 'map',
+    title: 'Encuentra quests',
+    description: 'Abre el mapa, descubre misiones cercanas y elige tu próxima aventura.',
+    color: 'bg-primary',
+  },
+  {
+    number: '02',
+    icon: 'footprints',
+    title: 'Explora el lugar',
+    description: 'Camina hasta la ubicación y descubre algo nuevo en tu ciudad.',
+    color: 'bg-accent',
+  },
+  {
+    number: '03',
+    icon: 'scan',
+    title: 'Escanea y verifica',
+    description: 'Escanea el QR o toma una foto como prueba de tu visita.',
+    color: 'bg-primary',
+  },
+  {
+    number: '04',
+    icon: 'coins',
+    title: 'Gana tokens',
+    description: 'Recibe recompensas y canjéalas en comercios locales.',
+    color: 'bg-accent',
+  },
+];
+
+const icons: Record<string, string> = {
+  map: `<svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+  </svg>`,
+  footprints: `<svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+  </svg>`,
+  scan: `<svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+  </svg>`,
+  coins: `<svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>`,
+};
+---
+
+<section id="como-funciona" class="w-full bg-off-white py-16 lg:py-24">
+  <div class="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
+    <!-- Section Header -->
+    <div class="text-center mb-12 lg:mb-16 reveal">
+      <span class="pill pill-accent mb-4 inline-block">Cómo funciona</span>
+      <h2 class="heading-2 text-text-heading mt-4">
+        Tu aventura en 4 pasos
+      </h2>
+      <p class="body-text text-text-muted mt-4 max-w-2xl mx-auto">
+        Explora tu ciudad de una forma completamente nueva. Completa misiones,
+        descubre lugares secretos y gana recompensas reales.
+      </p>
+    </div>
+
+    <!-- Steps Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {steps.map((step, index) => (
+        <div class="reveal card card-hover p-6 lg:p-8 relative group">
+          <!-- Step Number -->
+          <span class="absolute top-4 right-4 text-5xl font-heading font-bold text-text-heading/5">
+            {step.number}
+          </span>
+
+          <!-- Icon -->
+          <div class={`w-14 h-14 rounded-2xl ${step.color} flex items-center justify-center mb-6 transition-transform group-hover:scale-110`}>
+            <Fragment set:html={icons[step.icon]} />
+          </div>
+
+          <!-- Content -->
+          <h3 class="text-xl font-heading font-bold text-text-heading mb-3">
+            {step.title}
+          </h3>
+          <p class="text-sm text-text-muted leading-relaxed">
+            {step.description}
+          </p>
+
+          <!-- Connector Line (hidden on last item and mobile) -->
+          {index < steps.length - 1 && (
+            <div class="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-primary/30 to-transparent" />
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

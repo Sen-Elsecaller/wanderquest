@@ -1,0 +1,271 @@
+---
+// AnimatedCompass - Brújula SVG animada
+// La aguja apunta hacia la derecha-abajo (hacia la ruta)
+
+interface Props {
+  size?: number;
+  class?: string;
+}
+
+const { size = 200, class: className = '' } = Astro.props;
+---
+
+<div class={`compass-container ${className}`} style={`width: ${size}px; height: ${size}px;`}>
+  <svg
+    viewBox="0 0 200 200"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    class="compass-svg"
+  >
+    <!-- Definiciones: gradientes y filtros -->
+    <defs>
+      <!-- Glow filter -->
+      <filter id="compass-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+
+      <!-- Gradiente para la aguja norte -->
+      <linearGradient id="needle-north" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="var(--color-accent)" />
+        <stop offset="100%" stop-color="#E85D04" />
+      </linearGradient>
+
+      <!-- Gradiente para la aguja sur -->
+      <linearGradient id="needle-south" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="var(--color-primary)" />
+        <stop offset="100%" stop-color="#0E7490" />
+      </linearGradient>
+
+      <!-- Gradiente para el anillo exterior -->
+      <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.2" />
+        <stop offset="50%" stop-color="var(--color-accent)" stop-opacity="0.1" />
+        <stop offset="100%" stop-color="var(--color-primary)" stop-opacity="0.2" />
+      </linearGradient>
+    </defs>
+
+    <!-- Anillo exterior con glow pulsante -->
+    <circle
+      cx="100"
+      cy="100"
+      r="90"
+      stroke="url(#ring-gradient)"
+      stroke-width="2"
+      fill="none"
+      class="compass-ring-outer"
+    />
+
+    <!-- Anillo de fondo -->
+    <circle
+      cx="100"
+      cy="100"
+      r="80"
+      fill="white"
+      stroke="var(--color-navy)"
+      stroke-width="1"
+      stroke-opacity="0.1"
+      class="compass-body"
+    />
+
+    <!-- Marcas de grados (pequeñas líneas alrededor) -->
+    <g class="compass-ticks" opacity="0.3">
+      {[...Array(36)].map((_, i) => (
+        <line
+          x1="100"
+          y1="25"
+          x2="100"
+          y2={i % 9 === 0 ? "32" : "28"}
+          stroke="var(--color-navy)"
+          stroke-width={i % 9 === 0 ? "2" : "1"}
+          transform={`rotate(${i * 10} 100 100)`}
+        />
+      ))}
+    </g>
+
+    <!-- Círculo interior decorativo -->
+    <circle
+      cx="100"
+      cy="100"
+      r="60"
+      fill="none"
+      stroke="var(--color-primary)"
+      stroke-width="1"
+      stroke-opacity="0.15"
+      stroke-dasharray="4 4"
+    />
+
+    <!-- Grupo de la aguja - rotado 45° para apuntar a derecha-abajo -->
+    <g class="compass-needle-group" transform="rotate(135 100 100)">
+      <!-- Aguja Norte (coral/naranja) - apunta hacia arriba en el grupo -->
+      <path
+        d="M100 30 L108 100 L100 90 L92 100 Z"
+        fill="url(#needle-north)"
+        class="needle-north"
+        filter="url(#compass-glow)"
+      />
+
+      <!-- Aguja Sur (teal) - apunta hacia abajo en el grupo -->
+      <path
+        d="M100 170 L108 100 L100 110 L92 100 Z"
+        fill="url(#needle-south)"
+        class="needle-south"
+      />
+
+      <!-- Centro de la aguja -->
+      <circle
+        cx="100"
+        cy="100"
+        r="8"
+        fill="white"
+        stroke="var(--color-navy)"
+        stroke-width="2"
+      />
+      <circle
+        cx="100"
+        cy="100"
+        r="3"
+        fill="var(--color-navy)"
+      />
+    </g>
+
+    <!-- Letras de dirección (rotadas para coincidir con la aguja) -->
+    <g class="compass-directions" transform="rotate(135 100 100)">
+      <text x="100" y="18" text-anchor="middle" class="direction-label north">N</text>
+      <text x="182" y="104" text-anchor="middle" class="direction-label">E</text>
+      <text x="100" y="192" text-anchor="middle" class="direction-label">S</text>
+      <text x="18" y="104" text-anchor="middle" class="direction-label">O</text>
+    </g>
+
+    <!-- Puntos decorativos en las diagonales -->
+    <g class="compass-dots" opacity="0.4">
+      <circle cx="100" cy="100" r="2" fill="var(--color-primary)" transform="translate(50, -50)" />
+      <circle cx="100" cy="100" r="2" fill="var(--color-primary)" transform="translate(50, 50)" />
+      <circle cx="100" cy="100" r="2" fill="var(--color-primary)" transform="translate(-50, 50)" />
+      <circle cx="100" cy="100" r="2" fill="var(--color-primary)" transform="translate(-50, -50)" />
+    </g>
+  </svg>
+
+  <!-- Efecto de pulso exterior -->
+  <div class="compass-pulse"></div>
+</div>
+
+<style>
+  .compass-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .compass-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 10px 30px rgba(8, 145, 178, 0.2));
+  }
+
+  /* Animación de oscilación de la aguja */
+  .compass-needle-group {
+    transform-origin: 100px 100px;
+    animation: needle-wobble 4s ease-in-out infinite;
+  }
+
+  @keyframes needle-wobble {
+    0%, 100% {
+      transform: rotate(135deg);
+    }
+    25% {
+      transform: rotate(138deg);
+    }
+    50% {
+      transform: rotate(132deg);
+    }
+    75% {
+      transform: rotate(136deg);
+    }
+  }
+
+  /* Las letras de dirección contra-rotan para mantenerse legibles */
+  .direction-label {
+    font-family: var(--font-family-heading);
+    font-size: 12px;
+    font-weight: 700;
+    fill: var(--color-navy);
+    opacity: 0.6;
+  }
+
+  .direction-label.north {
+    fill: var(--color-accent);
+    opacity: 1;
+    font-size: 14px;
+  }
+
+  /* Glow pulsante en el anillo exterior */
+  .compass-ring-outer {
+    animation: ring-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes ring-pulse {
+    0%, 100% {
+      stroke-opacity: 0.3;
+      stroke-width: 2;
+    }
+    50% {
+      stroke-opacity: 0.6;
+      stroke-width: 4;
+    }
+  }
+
+  /* Pulso exterior expandible */
+  .compass-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    animation: pulse-expand 3s ease-out infinite;
+  }
+
+  @keyframes pulse-expand {
+    0% {
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0.5;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.3);
+      opacity: 0;
+    }
+  }
+
+  /* Rotación suave del cuerpo (muy sutil) */
+  .compass-body {
+    transform-origin: 100px 100px;
+    animation: body-breathe 6s ease-in-out infinite;
+  }
+
+  @keyframes body-breathe {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+  }
+
+  /* Hover effect */
+  .compass-container:hover .compass-needle-group {
+    animation: needle-wobble 2s ease-in-out infinite;
+  }
+
+  .compass-container:hover .compass-pulse {
+    animation: pulse-expand 1.5s ease-out infinite;
+    border-color: var(--color-accent);
+  }
+</style>

@@ -1,0 +1,288 @@
+---
+// Hero - Inmersivo y minimalista
+// Previa atractiva al JourneyMap con Vanta.js WAVES
+---
+
+<section class="hero-section relative min-h-screen w-full overflow-hidden flex items-center justify-center">
+  <!-- Fondo Vanta.js -->
+  <div id="vanta-bg" class="absolute inset-0"></div>
+
+  <!-- Overlay sutil para legibilidad - solo arriba para el texto -->
+  <div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
+
+  <!-- Contenido centrado -->
+  <div class="hero-content relative z-10 text-center px-6 max-w-4xl mx-auto">
+    <!-- App name -->
+    <p class="hero-app-name">WanderQuest</p>
+
+    <!-- Headline -->
+    <h1 class="hero-headline">
+      <span class="block">EXPLORA</span>
+      <span class="block hero-headline-accent">TU CIUDAD</span>
+    </h1>
+
+    <!-- Subheadline -->
+    <p class="hero-subheadline">
+      Gana recompensas mientras caminas.
+    </p>
+
+    <!-- CTA Button -->
+    <a href="#como-funciona" class="hero-cta group">
+      <span>Comienza a explorar</span>
+      <svg class="w-5 h-5 transition-transform group-hover:translate-y-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </a>
+
+    <!-- Stellar Badge -->
+    <p class="hero-stellar">
+      Powered by Stellar
+      <img src="/stellar-logo-small.png" alt="Stellar" class="inline-block h-4 w-auto ml-1 opacity-70" />
+    </p>
+  </div>
+
+  <!-- Indicador de scroll -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 scroll-indicator">
+    <div class="scroll-line"></div>
+  </div>
+
+  <!-- Curva inferior deshabilitada para globe - descomentar si se usa waves -->
+  <!--
+  <div class="hero-curve">
+    <svg viewBox="0 0 1440 120" fill="none" preserveAspectRatio="none">
+      <path d="M0,120 L0,60 Q360,0 720,60 T1440,60 L1440,120 Z" fill="var(--color-off-white)"/>
+    </svg>
+  </div>
+  -->
+</section>
+
+<style>
+  .hero-section {
+    background: var(--color-off-white);
+    padding-top: 80px;
+  }
+
+  /* Vanta background container */
+  #vanta-bg {
+    z-index: 0;
+  }
+
+  /* Contenido */
+  .hero-content {
+    animation: fadeInUp 1s ease-out;
+  }
+
+  /* App name */
+  .hero-app-name {
+    font-family: var(--font-family-heading);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Headline */
+  .hero-headline {
+    font-family: var(--font-family-heading);
+    font-size: clamp(3.5rem, 12vw, 8rem);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--color-navy);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-headline-accent {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Subheadline */
+  .hero-subheadline {
+    font-family: var(--font-family-body);
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: var(--color-text-muted);
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+  }
+
+  /* CTA */
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 36px;
+    background: linear-gradient(135deg, var(--color-accent), #E85D04);
+    color: white;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(249, 115, 22, 0.35);
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .hero-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(249, 115, 22, 0.45);
+  }
+
+  /* Stellar Text */
+  .hero-stellar {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+  }
+
+  /* Scroll indicator */
+  .scroll-indicator {
+    opacity: 0.4;
+    animation: fadeInUp 1s ease-out 0.5s both;
+  }
+
+  .scroll-line {
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--color-primary), transparent);
+    border-radius: 2px;
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% {
+      opacity: 0.4;
+      transform: scaleY(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scaleY(1.2);
+    }
+  }
+
+  /* Curva inferior */
+  .hero-curve {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    pointer-events: none;
+  }
+
+  .hero-curve svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero-headline {
+      font-size: clamp(2.5rem, 15vw, 4rem);
+    }
+
+    .hero-subheadline {
+      font-size: 1rem;
+      padding: 0 1rem;
+    }
+
+    .hero-cta {
+      padding: 16px 28px;
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<!-- Three.js para WAVES, GLOBE -->
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<!-- p5.js para TOPOLOGY -->
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+<!-- Efectos Vanta -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.topology.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof VANTA === 'undefined') return;
+
+    // ========================================
+    // CAMBIAR EFECTO AQUÍ: 'waves' | 'topology' | 'globe'
+    // ========================================
+    const EFECTO = 'globe';
+
+    const configs = {
+      // ───────────────────────────────────────
+      waves: () => VANTA.WAVES({
+        el: '#vanta-bg',
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        scale: 0.00,
+        scaleMobile: 1.00,
+        color: 0x0891B2,          // Teal
+        shininess: 25.00,
+        waveHeight: 15.00,
+        waveSpeed: 0.5,
+        zoom: 0.75,
+      }),
+
+      // ───────────────────────────────────────
+      topology: () => VANTA.TOPOLOGY({
+        el: '#vanta-bg',
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: true,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        color: 0x0891B2,          // Teal - color de líneas
+        backgroundColor: 0xF6F7FA, // Off-white
+      }),
+
+      // ───────────────────────────────────────
+      globe: () => VANTA.GLOBE({
+        el: '#vanta-bg',
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: window.innerHeight,
+        minWidth: window.innerWidth,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        color: 0x0891B2,          // Teal - color principal
+        color2: 0xF97316,         // Coral - color secundario
+        backgroundColor: 0xF6F7FA, // Off-white - mismo que --color-off-white
+        size: 1.20,               // Globo más grande
+        points: 12.00,            // Puntos en la red
+        maxDistance: 25.00,       // Conexiones más largas
+        spacing: 20.00,           // Menor = red más densa y amplia
+      }),
+    };
+
+    // Ejecutar el efecto seleccionado
+    if (configs[EFECTO]) {
+      configs[EFECTO]();
+    }
+  });
+</script>

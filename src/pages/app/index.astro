@@ -1,0 +1,188 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="WanderQuest - Mapa" activeTab="map" showBottomNav={true}>
+  <!-- MAP LAYER -->
+  <div class="absolute inset-0 z-0 bg-map-pattern overflow-hidden">
+    <!-- Simulated city elements -->
+    <div class="absolute top-[-10%] left-[-20%] w-[140%] h-[140%] opacity-40 pointer-events-none">
+      <!-- Park -->
+      <div class="absolute top-[30%] left-[40%] w-64 h-48 bg-emerald-100/50 rounded-3xl transform rotate-12"></div>
+      <!-- River -->
+      <div class="absolute top-[0%] right-[20%] w-24 h-[120%] bg-blue-100/50 transform -rotate-6 border-l-4 border-blue-200/30"></div>
+      <!-- Block -->
+      <div class="absolute bottom-[20%] left-[10%] w-56 h-56 bg-white/40 rounded-xl"></div>
+      <!-- Block -->
+      <div class="absolute top-[15%] right-[5%] w-40 h-80 bg-white/40 rounded-xl"></div>
+    </div>
+
+    <!-- Current Location Marker -->
+    <div class="absolute top-[55%] left-[48%] transform -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center">
+      <div class="absolute w-12 h-12 bg-primary/30 rounded-full animate-pulse-ring"></div>
+      <div class="w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-primary z-20">
+        <div class="w-2.5 h-2.5 bg-primary rounded-full"></div>
+      </div>
+    </div>
+
+    <!-- Quest Markers -->
+    <!-- 1. Regular Quest (Teal) - Museo -->
+    <a href="/app/quest" class="absolute top-[35%] left-[25%] transform -translate-x-1/2 -translate-y-full z-10 flex flex-col items-center group cursor-pointer">
+      <div class="bg-primary text-white p-2 rounded-full shadow-lg transform transition-transform hover:scale-110 hover:-translate-y-1">
+        <span class="material-icons-round text-lg">museum</span>
+      </div>
+      <div class="w-2 h-2 bg-primary rotate-45 transform -translate-y-1.5 rounded-[1px]"></div>
+      <div class="absolute top-full mt-1 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[10px] font-bold text-primary shadow-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+        Exhibicion de Arte
+      </div>
+    </a>
+
+    <!-- 2. Regular Quest (Teal) - Restaurante -->
+    <a href="/app/quest" class="absolute top-[42%] right-[15%] transform -translate-x-1/2 -translate-y-full z-10 flex flex-col items-center group cursor-pointer">
+      <div class="bg-primary text-white p-2 rounded-full shadow-lg transform transition-transform hover:scale-110 hover:-translate-y-1">
+        <span class="material-icons-round text-lg">restaurant</span>
+      </div>
+      <div class="w-2 h-2 bg-primary rotate-45 transform -translate-y-1.5 rounded-[1px]"></div>
+    </a>
+
+    <!-- 3. Limited Time Quest (Coral) -->
+    <a href="/app/quest" class="absolute top-[20%] left-[60%] transform -translate-x-1/2 -translate-y-full z-10 flex flex-col items-center group cursor-pointer">
+      <!-- Timer Badge -->
+      <div class="absolute -top-3 bg-neutral-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-20">
+        14:00
+      </div>
+      <div class="bg-coral text-white w-10 h-10 flex items-center justify-center rounded-xl shadow-lg transform rotate-45 border-2 border-white transition-transform hover:scale-110 hover:-translate-y-1">
+        <span class="material-icons-round text-lg transform -rotate-45">bolt</span>
+      </div>
+      <div class="w-3 h-1 bg-neutral-900/20 rounded-full mt-2 blur-[1px]"></div>
+    </a>
+
+    <!-- 4. Narrative Quest (Gold) -->
+    <a href="/app/quest" class="absolute bottom-[35%] left-[20%] transform -translate-x-1/2 -translate-y-full z-10 flex flex-col items-center group cursor-pointer">
+      <div class="relative">
+        <div class="absolute inset-0 bg-gold blur-md opacity-40 rounded-full animate-pulse"></div>
+        <div class="bg-gradient-to-br from-yellow-300 to-gold text-neutral-900 p-2.5 rounded-full shadow-xl border-2 border-white relative z-10 transform transition-transform hover:scale-110 hover:-translate-y-1">
+          <span class="material-icons-round text-xl">auto_stories</span>
+        </div>
+      </div>
+      <div class="w-1 h-4 bg-neutral-800/50 rounded-full mt-1"></div>
+    </a>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="absolute top-0 left-0 w-full z-30 pt-12 px-4 pb-4 bg-gradient-to-b from-white/90 via-white/60 to-transparent backdrop-blur-[2px]">
+    <div class="flex items-center gap-3">
+      <!-- Logo -->
+      <div class="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center text-primary shrink-0">
+        <span class="material-icons-round text-2xl">explore</span>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="flex-1 h-12 bg-white/90 backdrop-blur-md shadow-glass rounded-full flex items-center px-4 gap-2 border border-white/50">
+        <span class="material-icons-round text-neutral-400">search</span>
+        <input
+          type="text"
+          placeholder="Buscar quests..."
+          class="bg-transparent border-none focus:ring-0 focus:outline-none text-neutral-700 placeholder-neutral-400 text-sm w-full font-medium"
+        />
+      </div>
+
+      <!-- Profile -->
+      <a href="/app/profile" class="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-primary to-primary-light shadow-sm shrink-0 cursor-pointer overflow-hidden">
+        <div class="w-full h-full rounded-full bg-primary/20 flex items-center justify-center">
+          <span class="material-icons-round text-primary text-lg">person</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Filters / Chips -->
+    <div class="flex gap-2 mt-3 overflow-x-auto hide-scrollbar pl-1 pb-1">
+      <button class="px-4 py-1.5 bg-primary text-white text-xs font-semibold rounded-full shadow-md whitespace-nowrap">Todos</button>
+      <button class="px-4 py-1.5 bg-white/90 backdrop-blur-md text-neutral-600 text-xs font-semibold rounded-full shadow-sm border border-white whitespace-nowrap hover:bg-white transition-colors">Narrativa</button>
+      <button class="px-4 py-1.5 bg-white/90 backdrop-blur-md text-neutral-600 text-xs font-semibold rounded-full shadow-sm border border-white whitespace-nowrap hover:bg-white transition-colors">Limitados</button>
+      <button class="px-4 py-1.5 bg-white/90 backdrop-blur-md text-neutral-600 text-xs font-semibold rounded-full shadow-sm border border-white whitespace-nowrap hover:bg-white transition-colors">Ofertas Especiales</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET -->
+  <div class="absolute bottom-[90px] left-0 w-full z-30 flex flex-col justify-end pointer-events-none">
+    <div class="w-full px-4 pb-4 pointer-events-auto">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <h2 class="text-neutral-800 font-bold text-lg drop-shadow-sm">Cerca de ti</h2>
+        <a href="#" class="text-xs font-bold text-primary bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm hover:bg-white transition-colors">Ver todo</a>
+      </div>
+
+      <!-- Horizontal Scroll Cards -->
+      <div class="flex overflow-x-auto gap-4 hide-scrollbar pb-2 snap-x snap-mandatory">
+        <!-- Card 1: Street Art Hunt -->
+        <a href="/app/quest" class="bg-white rounded-2xl p-3 shadow-glass w-[85%] sm:w-[280px] shrink-0 snap-center border border-white/50 flex gap-3 items-center hover:shadow-lg transition-shadow">
+          <div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 relative bg-gradient-to-br from-orange-400 to-pink-500">
+            <div class="absolute top-1 left-1 bg-black/50 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+              <span class="text-[10px] font-bold text-white">Arte</span>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="material-icons-round text-white/80 text-3xl">palette</span>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0 pr-1">
+            <h3 class="font-bold text-neutral-800 truncate">Street Art Hunt</h3>
+            <div class="flex items-center text-xs text-neutral-500 mt-1 mb-2">
+              <span class="material-icons-round text-[14px] mr-1">place</span>
+              250m
+            </div>
+            <div class="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-full w-fit">
+              <span class="material-icons-round text-primary text-[14px]">token</span>
+              <span class="text-xs font-bold text-primary">20 WQ</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 2: Centro Historico -->
+        <a href="/app/quest" class="bg-white rounded-2xl p-3 shadow-glass w-[85%] sm:w-[280px] shrink-0 snap-center border border-white/50 flex gap-3 items-center hover:shadow-lg transition-shadow">
+          <div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 relative bg-gradient-to-br from-amber-400 to-orange-500">
+            <div class="absolute top-1 left-1 bg-black/50 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+              <span class="text-[10px] font-bold text-white">Historia</span>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="material-icons-round text-white/80 text-3xl">account_balance</span>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0 pr-1">
+            <h3 class="font-bold text-neutral-800 truncate">Centro Historico</h3>
+            <div class="flex items-center text-xs text-neutral-500 mt-1 mb-2">
+              <span class="material-icons-round text-[14px] mr-1">place</span>
+              500m
+            </div>
+            <div class="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-full w-fit">
+              <span class="material-icons-round text-primary text-[14px]">token</span>
+              <span class="text-xs font-bold text-primary">50 WQ</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 3: Flash Mob (Limited Time) -->
+        <a href="/app/quest" class="bg-white rounded-2xl p-3 shadow-glass w-[85%] sm:w-[280px] shrink-0 snap-center border border-white/50 flex gap-3 items-center hover:shadow-lg transition-shadow">
+          <div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 relative bg-gradient-to-br from-coral to-red-500">
+            <div class="absolute top-1 left-1 bg-coral/90 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+              <span class="text-[10px] font-bold text-white">Evento</span>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="material-icons-round text-white/80 text-3xl">celebration</span>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0 pr-1">
+            <h3 class="font-bold text-neutral-800 truncate">Flash Mob</h3>
+            <div class="flex items-center text-xs text-neutral-500 mt-1 mb-2">
+              <span class="material-icons-round text-[14px] mr-1">timer</span>
+              14:00 restantes
+            </div>
+            <div class="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-full w-fit">
+              <span class="material-icons-round text-primary text-[14px]">token</span>
+              <span class="text-xs font-bold text-primary">100 WQ</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</AppLayout>

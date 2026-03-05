@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WanderQuest - Explorer Profile</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#088eaf",
+                        "primary-dark": "#066c85",
+                        "primary-light": "#e6f4f7",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#101f22",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a2c30",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-100 min-h-screen antialiased pb-24">
+<!-- Header -->
+<header class="fixed top-0 w-full bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md z-50 px-6 py-4 flex justify-between items-center">
+<h1 class="text-xl font-bold text-gray-900 dark:text-white">My Profile</h1>
+<button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300">
+<span class="material-icons-round">settings</span>
+</button>
+</header>
+<main class="pt-20 px-4 max-w-md mx-auto space-y-6">
+<!-- Profile Card -->
+<div class="relative bg-gradient-to-br from-primary to-primary-dark rounded-xl p-6 shadow-xl text-white overflow-hidden">
+<!-- Decorative circle -->
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+<div class="flex flex-col items-center relative z-10">
+<div class="relative mb-4">
+<div class="w-24 h-24 rounded-full border-4 border-white/30 p-1">
+<img alt="Young woman smiling explorer avatar" class="w-full h-full rounded-full object-cover" data-alt="Young female explorer avatar smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPz_QkSgeZjEooKj0hqiAvO6H-DqZpR97Xd_Xe0hT4wN2P66Wfvb1Ue1b8_H6vuT6HccIu2ktU_0N1u3O6uoacZPHp6WaiprsNTaFRj9D3r8bZ3H5mObWTpGYuhpmj2S1My8EmUPAe0FRttADBppLeNk4dXEUk6NVZ40QriGMR4CBIH43DPJfb4gaGyXLjzwosdKQLBJtkGj7y1AGO8hJGGBGfEMCEhyHUoIwhKgnPB9Bqyhn5mIXtq5zj0C6J3kmWLroemS59KdWj"/>
+</div>
+<div class="absolute -bottom-2 inset-x-0 flex justify-center">
+<span class="bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full shadow-lg border-2 border-primary">
+                            LVL 12
+                        </span>
+</div>
+</div>
+<h2 class="text-2xl font-bold">Alex Walker</h2>
+<p class="text-white/80 text-sm mb-1">@alex_explorer</p>
+<div class="flex items-center gap-2 mt-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+<span class="material-icons-round text-sm">military_tech</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Explorador Experto</span>
+</div>
+<!-- XP Bar -->
+<div class="w-full mt-6">
+<div class="flex justify-between text-xs font-medium text-white/90 mb-2">
+<span>XP Progress</span>
+<span>2450 / 3000</span>
+</div>
+<div class="h-3 bg-black/20 rounded-full overflow-hidden backdrop-blur-sm">
+<div class="h-full bg-amber-400 rounded-full" style="width: 82%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Crypto Wallet & Stats -->
+<div class="grid grid-cols-2 gap-4">
+<!-- WQ Balance -->
+<div class="col-span-2 bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm flex items-center justify-between border border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons-round">account_balance_wallet</span>
+</div>
+<div>
+<p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Wallet Balance</p>
+<p class="text-lg font-bold text-gray-900 dark:text-white">150 WQ</p>
+</div>
+</div>
+<button class="text-primary text-sm font-semibold hover:underline">Details</button>
+</div>
+<!-- Stats: Quests -->
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 text-center">
+<p class="text-3xl font-bold text-primary mb-1">47</p>
+<p class="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Quests</p>
+</div>
+<!-- Stats: Routes -->
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 text-center">
+<p class="text-3xl font-bold text-primary mb-1">12</p>
+<p class="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Routes</p>
+</div>
+</div>
+<!-- Leaderboard Preview -->
+<section>
+<div class="flex justify-between items-end mb-4">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">Santiago Ranking</h3>
+<span class="text-primary text-sm font-semibold cursor-pointer">View All</span>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+<!-- User's Rank -->
+<div class="bg-primary/5 p-4 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800">
+<span class="font-bold text-primary text-lg w-8">#34</span>
+<img alt="User Avatar Small" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary" data-alt="Small avatar of user Alex Walker" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPFfkEAgSONuaExRFAjSqDiUnKcWew2nyphDcl9wcF-4E4UG3G1iuGA0vIlyfz9ec4LhW42pIl-6yeE8BXVNz6rUlru0ownbCYS0r5uiUdltlqsuGxFLypGqi6mujVOhj5fCm2WDciFTt4NnHK6gWXfEx_Ndtm3pQsB5eqJ861FMwYZ_YVQE-pDIlXpKYU7BPOTZNOh7GTUXrLW58jmwyjhTmpq9q3qcb6vYp16nwBQmSbVw5x1n7ETnHpdOcaJ4or5ut8BcOKgg-8"/>
+<div class="flex-1">
+<p class="font-bold text-sm text-gray-900 dark:text-white">You</p>
+<p class="text-xs text-gray-500">2450 XP</p>
+</div>
+<span class="material-icons-round text-gray-400">arrow_forward_ios</span>
+</div>
+<!-- Top Players Preview -->
+<div class="p-4 flex justify-between items-center">
+<div class="flex -space-x-3">
+<img alt="Top player 1 avatar" class="w-10 h-10 rounded-full border-2 border-white dark:border-surface-dark object-cover" data-alt="Avatar of male user smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcpgbwClNfbGYlXI8_MLws93tLcA7bAfdvtc0-whBTrOc81uxkiMmrfYW_9TLo4Yzhq2JIQ4xKl-OlxjhDPEK19jnXpFjZY6hLC5zbeDcfa2rVQ7Iv9tIThttPxZ3GlSjwWQzRK6pqzDagjP2PYmzRm6Cz3k-YsPsh35XpoIlqIJAC2FoIx_JLv7YaSJQMadSniy_4vg1wPgnKuLskWftrPU2v_eVtqnmTCeC_wTJwiwwPAAU02npIo_EONPY_mXaojYud8qppvY8b"/>
+<img alt="Top player 2 avatar" class="w-10 h-10 rounded-full border-2 border-white dark:border-surface-dark object-cover" data-alt="Avatar of female user smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwdnOEK6eY_0g7HJ1OmcK-L5C01UYRWheOQH-nqqu-yj7ryxHr3TvZVS1Zp1XcaVxDr5ZvmtK8FxAsgtFRhi8xxcbmt_VJEjTntZImckIciFqBgO77DeD4FGrB6TgOefaMcqZageG2MHfb8To2-eIWYUf4Fsn7YypQvxSimlkH1x32w1T_LUHCXcEXaIBoNB-64-RFnI0qF-AHUVDHa7qARwL38HVmPNyij5K93uBBCO6tZJautYVkkf7sB52ihTwK0LP1mOj4tLMz"/>
+<img alt="Top player 3 avatar" class="w-10 h-10 rounded-full border-2 border-white dark:border-surface-dark object-cover" data-alt="Avatar of male user serious" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVBvTlr9WCgIMx_rxLXPRvy6yAQUkRZpefnIaTud0OMnkCwPM4ozhw8u48A6Ahx7mCLwgB9yZI0QusKC4wz-JkQZft-wRrUIABrPD6jXmfICfPsfkEgwWLfwVh7UEJ6_viOCViVHW8ujZ8y1AKHhJj3vogSU766dvrpityMgMocGRmG_GfrNprCEWHxEHVkaAgoCRNWxTBzr7MejdyxXq66vUETLW5L_RfyqHJLet5GfGqWjkCd82rFzPzDnWqdHVxabuFG4Sasiqd"/>
+</div>
+<div class="text-right">
+<p class="text-xs text-gray-500 font-medium">Top 3 Players</p>
+<p class="text-xs text-primary font-bold">Leading with 8.5k+ XP</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Achievements -->
+<section>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Achievements</h3>
+<div class="grid grid-cols-3 gap-3">
+<!-- Unlocked 1 -->
+<div class="flex flex-col items-center p-3 bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-2 shadow-inner">
+<span class="material-icons-round text-3xl">flag</span>
+</div>
+<span class="text-xs font-bold text-center text-gray-900 dark:text-white leading-tight">Primera Quest</span>
+</div>
+<!-- Unlocked 2 -->
+<div class="flex flex-col items-center p-3 bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="w-14 h-14 rounded-full bg-primary/20 text-primary flex items-center justify-center mb-2 shadow-inner">
+<span class="material-icons-round text-3xl">photo_camera</span>
+</div>
+<span class="text-xs font-bold text-center text-gray-900 dark:text-white leading-tight">Shutterbug</span>
+</div>
+<!-- Unlocked 3 -->
+<div class="flex flex-col items-center p-3 bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2 shadow-inner">
+<span class="material-icons-round text-3xl">directions_walk</span>
+</div>
+<span class="text-xs font-bold text-center text-gray-900 dark:text-white leading-tight">Early Bird</span>
+</div>
+<!-- Locked 1 -->
+<div class="flex flex-col items-center p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 opacity-60">
+<div class="w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-400 flex items-center justify-center mb-2">
+<span class="material-icons-round text-3xl">menu_book</span>
+</div>
+<span class="text-xs font-semibold text-center text-gray-500 dark:text-gray-400 leading-tight">Historiador</span>
+</div>
+<!-- Locked 2 -->
+<div class="flex flex-col items-center p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 opacity-60">
+<div class="w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-400 flex items-center justify-center mb-2">
+<span class="material-icons-round text-3xl">nightlife</span>
+</div>
+<span class="text-xs font-semibold text-center text-gray-500 dark:text-gray-400 leading-tight">Urban Legend</span>
+</div>
+<!-- Locked 3 -->
+<div class="flex flex-col items-center p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 opacity-60">
+<div class="w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-400 flex items-center justify-center mb-2">
+<span class="material-icons-round text-3xl">diamond</span>
+</div>
+<span class="text-xs font-semibold text-center text-gray-500 dark:text-gray-400 leading-tight">Treasure Hunter</span>
+</div>
+</div>
+</section>
+<!-- Recent Activity Feed -->
+<section>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Recent Quests</h3>
+<div class="space-y-4">
+<!-- Activity Item 1 -->
+<div class="bg-surface-light dark:bg-surface-dark p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4">
+<div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden relative group">
+<img alt="Historic brick building in downtown area" class="w-full h-full object-cover transform transition-transform group-hover:scale-110" data-alt="Historic brick building facade downtown" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1JQoHsjrRMAKxZ7iXYybys33rnEDQL69V-v9fW6M09WFgsc7npt_xqVNfexhTQHgkZ8pmSnKpJeGNVB-IYP_s0BxhYmjl7wRLbS0IoDEXfbgxGwsjm7MBBmFjiaadTAOcebRxRuHiFWBaq0eroXz5fR4l9ZqXwOyZoIbaU7-UJrjJKXx8f0ckMIuxZhyFfK4gt7HAxxYtJ0cMZOIIu3D1Om9VR3bh2DT4WOoigxek8DZm_alfIk9do6IBsevsR5VJx-HCtvV9gsrI"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<h4 class="font-bold text-gray-900 dark:text-white text-sm">Downtown Historical</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">Completed all 5 checkpoints around the old plaza. Found the hidden mural!</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">+50 XP</span>
+<span class="text-[10px] text-gray-400">2h ago</span>
+</div>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="bg-surface-light dark:bg-surface-dark p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4">
+<div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden relative group">
+<img alt="Modern urban bridge architecture" class="w-full h-full object-cover transform transition-transform group-hover:scale-110" data-alt="Modern bridge structure architecture view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeQoDzsGeeNjNN_ZNsrxsUdJVOaPb4u7tjwGmvN2-jfSpl2sWjphJRrdiJP9JdXBGAK4ZdhNtPssuk4GvjomAH-IG8_p4fBdtV8SuL4pw_yVBonBnoZQAO7cGDvmdUOH838YbKJ-KwpCvCuAl325tJGIScTjmCCfNsmDl21QgUx-fI8aOxfiw8a_qImsxxPYQMnqrA5Niqi2he5-8B-JVatMbyxhqswk9sP32-hrqs-0n_WEgLxBSZlJvkSDlj9z3_7LhGzC4dIXZn"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<h4 class="font-bold text-gray-900 dark:text-white text-sm">River Walk Art</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">Captured 3 street art pieces along the river bank.</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">+30 XP</span>
+<span class="text-[10px] text-gray-400">1d ago</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 w-full bg-surface-light dark:bg-surface-dark border-t border-gray-200 dark:border-gray-800 px-6 py-3 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+<span class="material-icons-round text-2xl">explore</span>
+<span class="text-[10px] font-medium">Explore</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+<span class="material-icons-round text-2xl">map</span>
+<span class="text-[10px] font-medium">Map</span>
+</button>
+<!-- Center Action Button -->
+<button class="relative -top-6 bg-primary text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg shadow-primary/30 transform transition-transform active:scale-95">
+<span class="material-icons-round text-3xl">qr_code_scanner</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+<span class="material-icons-round text-2xl">leaderboard</span>
+<span class="text-[10px] font-medium">Rank</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons-round text-2xl">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</nav>
+</body></html>
