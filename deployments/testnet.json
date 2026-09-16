@@ -1,0 +1,25 @@
+{
+    "network":  "testnet",
+    "deployed_at":  "2026-09-16T23:51:32Z",
+    "admin_address":  "GCVM3TK54JBQJNVDPZGWPU543MCHCFE4R4NU6QMPQJVSL35HBRYFT6RC",
+    "identity":  "wanderquest-admin",
+    "wq_token":  "CC4LXDWGXJ4GSJNHLMM3RJOYSSK2TSQ5M7BFQMBVT7UDX63C34UJIDL5",
+    "quest_manager":  "CABDQUAZM65KCFI5H7636HRZLSKOT27DUG6Y5IUPTHG6GD6YPSGHWTFL",
+    "quests":  [
+                   {
+                       "quest_id":  1,
+                       "location_pubkey":  "fec04469934adb8dcfc823a8c4cdddbd2872dd34a274575bc93133e0f6b58e15",
+                       "reward":  50000000
+                   },
+                   {
+                       "quest_id":  2,
+                       "location_pubkey":  "cd2d7420f1819281764f63512aa442dd5c3187334cf3b227965650e1ac93b390",
+                       "reward":  30000000
+                   },
+                   {
+                       "quest_id":  3,
+                       "location_pubkey":  "c811ce6c58aa1c0f77c22a28804c2e0227896a7f23b8ec0045a058ffb7219ed4",
+                       "reward":  80000000
+                   }
+               ]
+}

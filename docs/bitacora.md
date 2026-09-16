@@ -81,3 +81,76 @@ se hace aca; **desplegar no**.
 
 F0 del plan (`docs/plan.md`): escribir `quest-manager/src/test.rs` y dejar el
 workspace compilando entero.
+
+---
+
+## 2026-09-16 (tarde) - Del contenedor al PC: F0, F1 y F2 en una sesion
+
+**Cambio de entorno.** La sesion arranco en el PC del usuario (Windows), no en el
+contenedor. Se invirtio la restriccion: la testnet **responde** (horizon, RPC y
+friendbot), pero no habia toolchain. Instalado en la maquina: Rust 1.98.1 con host
+`x86_64-pc-windows-gnu` y target `wasm32v1-none`, `stellar-cli` 28.0.0 por winget,
+la doc oficial clonada en `~/stellar/stellar-docs`, y `@stellar/stellar-sdk` 17.
+
+No hay MSVC Build Tools y el usuario pidio no instalar 6 GB de Visual Studio, asi
+que el host es GNU. Su linker desborda el limite de 65535 ordinales al exportar el
+`cdylib` de un contrato: `contracts/.cargo/config.toml` pasa
+`-C link-arg=-Wl,--exclude-all-symbols` y con eso `cargo test` linkea. El wasm no
+pasa por ahi.
+
+### Bug serio, encontrado antes de desplegar
+
+`quest-manager` dependia del crate `wq-token` solo para usar su cliente. Eso linkea
+los `#[contractimpl]` del token dentro del wasm del manager: `quest_manager.wasm`
+exportaba `mint`, `burn` y `transfer`, y los dos `initialize` (de distinta aridad)
+colisionaban, asi que el linker **borro el del manager**. El contrato no se podia
+inicializar; el deploy habria fallado en el primer comando.
+
+Arreglo: declarar la interfaz con `#[contractclient]` y dejar `wq-token` como
+`dev-dependency`. `quest_manager.wasm` paso de 18 exports a 10, los suyos.
+
+**Leccion, ya en la skill:** despues de tocar dependencias entre contratos, mirar
+los exports del wasm. El warning del linker era la unica pista y era facil de pasar
+por alto entre el ruido del build.
+
+### Hecho
+
+- **F0:** `quest-manager/src/test.rs` escrito (11 tests con firmas ed25519 reales),
+  eventos migrados a `#[contractevent]`, wasm limpio.
+- **F1:** firma atada al usuario; SEP-41 completo implementando
+  `token::TokenInterface` del SDK (allowances en storage temporal que vence junto
+  con el permiso); TTL en instance, quests, nonces y balances. 22 tests verdes,
+  clippy limpio.
+- **F2:** desplegado en testnet. `scripts/deploy-testnet.ps1` lo rehace de cero.
+  - WQToken `CC4LXDWGXJ4GSJNHLMM3RJOYSSK2TSQ5M7BFQMBVT7UDX63C34UJIDL5`
+  - QuestManager `CABDQUAZM65KCFI5H7636HRZLSKOT27DUG6Y5IUPTHG6GD6YPSGHWTFL`
+  - 3 quests registradas (5, 3 y 8 WQ), llaves de ubicacion en `.env`.
+- **Prueba en vivo** (`scripts/smoke-testnet.mjs`): visita verificada acuña 5 WQ,
+  canje deja 0.95 al comercio y quema 0.05, y los tres ataques se rechazan en la
+  red - reuso con `WasmVm, InvalidAction`, prueba ajena y firma falsa con
+  `Crypto, InvalidInput`.
+
+### Verificado
+
+- `Address.fromString(g).toScVal().toXDR()` del JS SDK produce **los mismos bytes**
+  que `user.to_xdr(&env)` en el contrato. Lo prueba el mint en vivo.
+- En los tests, `env.events().all()` solo trae los eventos de la ultima invocacion:
+  leerlos antes de cualquier otra llamada.
+- Una entrada `persistent` archivada no se puede recrear, solo restaurar
+  (`state-archival.mdx`), asi que el registro de nonces sobrevive a su TTL.
+- `instance().extend_ttl()` extiende instancia **y codigo**.
+
+### Decisiones tomadas
+
+- **Rust queda en 4 espacios con rustfmt por defecto.** La preferencia de tabs del
+  usuario aplica al resto; forzarla en Rust pelea con toda la herramienta.
+- **El deploy a testnet lo corre el agente**, ya que la red es alcanzable. Mainnet y
+  fondos reales siguen siendo del usuario.
+- Las 3 quests de Santiago se registraron sin decidir los lugares: el contrato solo
+  guarda llave publica, recompensa y estado. El nombre y la foto son frontend.
+
+### Pendiente al cerrar
+
+F3: backend firmante (`/api/location/challenge` y `/sign`) y cablear `scan` y
+`wallet` a la cadena. La logica de firma ya esta escrita y probada en
+`scripts/smoke-testnet.mjs`; falta moverla a rutas de Astro con SSR.

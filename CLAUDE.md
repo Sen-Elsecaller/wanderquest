@@ -18,36 +18,38 @@ General Track. Deadline de envío **2026-09-30 22:00 UTC**. Todo en **testnet**.
 
 Marca el estado real de cada pieza: `escrito` / `compila` / `testeado` / `deployado`.
 
-- **`contracts/wq-token`** — token WQ (fungible, admin-mint). Estado: **compila, 4 tests pasan**.
-  Falta SEP-41 completo (`allowance`, `approve`, `transfer_from`, `burn_from`).
+- **`contracts/wq-token`** — token WQ, SEP-41 completo vía `token::TokenInterface` del SDK, más
+  `mint` admin-gated. Estado: **desplegado en testnet, 11 tests pasan**.
 - **`contracts/quest-manager`** — verifica firma ed25519 de la visita on-chain y acuña; maneja
-  canje con fee/quema. Estado: **escrito, NO compila** — `lib.rs:187` declara `mod test;` y
-  `src/test.rs` no existe (`error[E0583]`).
-- **Frontend** — landing + 5 pantallas mock. Estado: **hecho, sin cablear a cadena**.
-- **Toolchain** — Rust 1.94 y target `wasm32v1-none` **listos en el contenedor**; `cargo test`
-  y el build a wasm corren acá. `stellar-cli` **por instalar**. MCP `stellar-raven`
-  **bloqueado acá** (403) — se conecta en el PC del usuario.
-- **Red** — la testnet **no es alcanzable desde el contenedor** (403 en horizon-testnet,
-  soroban-testnet y friendbot). Compilar y testear sí; **desplegar no**.
+  canje con fee/quema. Estado: **desplegado en testnet, 11 tests pasan**.
+- **Deploy** — `deployments/testnet.json` tiene los IDs. `scripts/deploy-testnet.ps1` rehace todo
+  de cero; `scripts/smoke-testnet.mjs` corre el recorrido completo y los 3 ataques contra la red.
+- **Frontend** — landing + 5 pantallas mock. Estado: **hecho, sin cablear a cadena**. Es lo que
+  sigue (F3).
+- **Backend firmante** — no existe todavía (F3). Las llaves ed25519 de las 3 ubicaciones ya están
+  generadas en `.env` (gitignoreado) y sus públicas registradas on-chain.
+- **Toolchain** — todo corre en el PC del usuario (Windows): Rust 1.98.1 host `x86_64-pc-windows-gnu`,
+  target `wasm32v1-none`, `stellar-cli` 28.0.0, Node 24. No hay MSVC Build Tools; ver la nota del
+  linker en la skill. MCP `stellar-raven` no está conectado a la sesión (el host sí responde).
+- **Red** — testnet **alcanzable**. Compilar, testear, desplegar y leer estado: todo desde acá.
 
 **Decisiones cerradas** (no reabrir sin motivo nuevo): WQ = contrato Soroban (no asset
 clásico); wallet = keypair en la app (demo); alcance = profundidad sobre el flujo core;
 verificación de visita = firma ed25519 verificada on-chain; off-ramp a CLP = simulado;
 **la llave ed25519 de cada ubicación vive en un backend firmante** (nunca en el QR ni en un
 tag pasivo); **la prueba de visita se ata al usuario** — se firma `quest_id || nonce ||
-address`; meta = **top 3 al 2026-09-30**, no escalar antes de eso.
+address` (implementado y probado en vivo); **Rust queda en 4 espacios con rustfmt por
+defecto** (la preferencia de tabs del usuario aplica al resto); meta = **top 3 al
+2026-09-30**, no escalar antes de eso.
 
-**Abierto — decisiones del usuario, pendientes antes de avanzar:**
+**Abierto — decisiones del usuario:**
 
-1. **Red del entorno.** ¿Habilitar `horizon-testnet.stellar.org`, `soroban-testnet.stellar.org`
-   y `friendbot.stellar.org` en la política de red? Hoy dan 403. Si entran, el agente despliega
-   y verifica contra la red solo; si no, F2 queda bloqueada esperando al usuario.
-2. **Indentación en Rust.** La preferencia del usuario es tabs; `contracts/` usa 4 espacios y
-   rustfmt por defecto también. ¿Migrar todo a tabs o dejar Rust como está?
-3. **Las 3 quests de Santiago a registrar en testnet.** Cerro Santa Lucía ya tiene imagen en
-   `public/`; faltan dos.
+1. **Las 3 quests de Santiago.** Cerro Santa Lucía ya tiene imagen en `public/`; faltan dos.
+   No bloquea la cadena: el contrato solo guarda llave pública, recompensa y estado — el
+   nombre, la foto y las coordenadas viven en el frontend. Las quests 1, 2 y 3 ya están
+   registradas en testnet con 5, 3 y 8 WQ.
 
-Ninguna bloquea F0. El resto de preguntas abiertas, al final de `docs/plan.md`.
+El resto de preguntas abiertas, al final de `docs/plan.md`.
 
 ---
 
@@ -61,10 +63,10 @@ Ninguna bloquea F0. El resto de preguntas abiertas, al final de `docs/plan.md`.
   dice dónde está el fuente del SDK vendorizado y la doc oficial clonada, ambos en disco.
   El SDK evoluciona rápido; una firma inventada cuesta un ciclo de build.
 - **Yo cargo el peso.** Escribo todo el código: contratos, frontend, configs, tests, bindings,
-  docs. **Compilo, corro los tests e itero en el contenedor hasta que pase todo** — no le paso
-  errores de compilación al usuario. Él decide, revisa y corre el deploy.
-- **El deploy es del usuario** mientras la testnet siga bloqueada acá. Se le entrega un script
-  de un comando y me pasa la salida.
+  docs. **Compilo, corro los tests, despliego a testnet y verifico contra la red hasta que pase
+  todo** — no le paso errores de compilación al usuario. Él decide y revisa.
+- **Mainnet y fondos reales siguen siendo del usuario.** Testnet la manejo yo; cualquier cosa
+  con valor real se pregunta antes.
 - **Commit y push a `master`** cuando el usuario lo pide o cuando el hook de cierre lo exija;
   avisando siempre qué se commiteó y por qué.
 - **No documentar una implementación como funcional hasta que compile y se pruebe.** Se escribe
@@ -125,8 +127,12 @@ wanderquest/
 ├── contracts/                # Workspace Rust/Soroban
 │   ├── Cargo.toml            # workspace + perfil release para Wasm
 │   ├── Cargo.lock            # fija soroban-sdk 27.0.6 — commiteado a propósito
+│   ├── .cargo/config.toml    # flag del linker mingw (ver skill)
 │   ├── wq-token/             # token WQ
 │   └── quest-manager/        # verificación de visita + acuñación + canje
+├── scripts/                  # deploy, llaves de ubicación, smoke test en vivo
+├── deployments/testnet.json  # IDs desplegados — público, se commitea
+├── .env                      # llaves ed25519 de ubicación — NUNCA se commitea
 ├── docs/                     # plan y bitácora
 ├── .claude/skills/           # skills del proyecto
 ├── public/                   # assets (logos, imágenes, HTMLs de referencia)
@@ -138,23 +144,26 @@ wanderquest/
 | Capa | Tecnología |
 |------|------------|
 | Frontend | Astro 5 · Tailwind CSS v4 (`@theme`) · GSAP/ScrollTrigger · Vanta.js + Three |
-| Contratos | Rust 1.94 · soroban-sdk **27.0.6** (fijado en `Cargo.lock`) · target `wasm32v1-none` |
-| Tooling | `stellar-cli` por instalar · doc oficial clonada en `/home/user/stellar/stellar-docs` |
-| Red | Stellar **testnet** — inalcanzable desde el contenedor, ver skill |
+| Contratos | Rust 1.98.1 · soroban-sdk **27.0.6** (fijado en `Cargo.lock`) · target `wasm32v1-none` |
+| Cadena (JS) | `@stellar/stellar-sdk` 17 · Node 24 |
+| Tooling | `stellar-cli` **28.0.0** · doc oficial clonada en `C:\Users\Sen\stellar\stellar-docs` |
+| Red | Stellar **testnet**, alcanzable desde el PC — contratos ya desplegados |
 
 ## Arquitectura on-chain
 
-- **`WQToken`** — fungible, 7 decimales. Balances en storage persistente con bump de TTL. Solo el
-  `admin` puede acuñar; el admin es el `QuestManager`, así que WQ nuevo solo nace de una visita
-  verificada.
+- **`WQToken`** — fungible, 7 decimales, SEP-41 completo (implementa `token::TokenInterface` del
+  SDK: allowances incluidas, y el `to` de `transfer` es `MuxedAddress`). Balances en storage
+  persistente con bump de TTL. Solo el `admin` puede acuñar; el admin es el `QuestManager`, así
+  que WQ nuevo solo nace de una visita verificada.
 - **`QuestManager`** — el CPVV. Cada quest tiene la **clave pública ed25519** de su ubicación. Al
   completar, el usuario envía una firma; el contrato la **verifica on-chain**
   (`env.crypto().ed25519_verify`) antes de acuñar la recompensa. El `nonce` usado queda
   marcado (anti-replay). `redeem` mueve WQ del usuario al comercio y quema el 5% (fee de
   recirculación del modelo económico).
-- **Mensaje firmado.** Hoy el código firma `quest_id || nonce`, lo que deja la prueba **al
-  portador**: quien la vea o la reciba por mensajería la cobra. Decidido en F1 pasar a
-  `quest_id || nonce || user.to_xdr(env)`. Pendiente de implementar.
+- **Mensaje firmado:** `quest_id` (big-endian) `|| nonce || user.to_xdr(env)`. La address dentro
+  del mensaje es lo que impide que la prueba sea al portador: una firma filtrada o reenviada no
+  le sirve a nadie más. Del lado JS los mismos bytes salen de
+  `Address.fromString(g).toScVal().toXDR()`.
 - **Verificación de visita: challenge-response.** El QR lleva `quest_id` y un nonce rotativo,
   nunca la llave. Un backend firmante custodia la llave ed25519 de cada ubicación, valida el
   nonce y firma incluyendo la address de quien reclama. Si la llave estuviera en el QR o en un

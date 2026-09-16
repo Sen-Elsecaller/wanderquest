@@ -3,7 +3,7 @@
 **Cierre:** 2026-09-30 22:00 UTC. **Meta:** top 3. **Red:** testnet.
 **Alcance elegido:** profundidad on-chain sobre el flujo core, no ancho de pantallas.
 
-## Qué existe el 30 de septiembre
+## Que existe el 30 de septiembre
 
 1. **WQ no se puede falsificar.** El unico `admin` del token es el QuestManager.
    La unica puerta por la que entra WQ nuevo es una funcion que antes verifica
@@ -21,66 +21,45 @@
 **Fuera de alcance, declarado:** dinero real, passkeys, mapa real, comercios
 reales, off-ramp a CLP. El GPS sigue siendo falsificable y se documenta como tal.
 
-## La restriccion que define el plan
+## Estado
 
-Este contenedor **no alcanza la testnet**: `horizon-testnet.stellar.org`,
-`soroban-testnet.stellar.org` y `friendbot.stellar.org` dan 403 en el proxy de
-egress. Los tests unitarios de soroban-sdk corren en un host local sin red, asi
-que compilar y testear se hace aca sin problema. **El deploy no.**
+F0, F1 y F2 estan hechas. Los puntos 1, 2 y 3 de arriba **ya ocurren contra
+testnet**: `node scripts/smoke-testnet.mjs` los corre de punta a punta y sale
+`TODO OK`. Lo que falta es que eso pase desde la app en vez de desde un script.
 
-Dos salidas, en orden de preferencia:
-- **A:** habilitar esos tres dominios en la politica de red del entorno. Elimina
-  la dependencia y permite iterar contra la red sin bloquear a nadie.
-- **B:** el deploy lo corre el usuario con un script de un comando (F2 lo entrega).
+### F0 - Desbloqueo — **hecho**
+- `contracts/quest-manager/src/test.rs` escrito con firmas ed25519 reales.
+- Eventos migrados de `env.events().publish()` a `#[contractevent]`.
+- Bug encontrado y corregido: depender del crate `wq-token` metia los exports del
+  token en el wasm del manager y borraba su `initialize`. Ver la skill.
 
-## Fases
+### F1 - Contratos correctos — **hecho**
+- Firma atada al usuario: `quest_id || nonce || user.to_xdr(env)`.
+- SEP-41 completo implementando `token::TokenInterface` del SDK.
+- TTL: instance (instancia + codigo), quests, nonces usados y balances.
+- 22 tests: camino feliz, los tres ataques, quest inactiva, owner, allowances
+  (gastada, excedida, vencida, revocada), muxed, y el arbol de auth de `redeem`.
 
-### F0 - Desbloqueo (D1)
-- `contracts/quest-manager/src/test.rs`: no existe y `lib.rs:187` lo declara, asi
-  que el crate no compila. Se escribe con `ed25519-dalek` (ya esta en dev-deps)
-  generando firmas reales.
-- Migrar eventos de `env.events().publish()` (deprecado en 27.0.6) a `#[contractevent]`.
-- Confirmar que `cargo build --target wasm32v1-none --release` produce el wasm.
+### F2 - Deploy a testnet — **hecho**
+- `scripts/deploy-testnet.ps1`: build, deploy de ambos, cableado y registro de las
+  3 quests, de una sola corrida.
+- `scripts/new-location-keys.mjs` genera las llaves ed25519 de ubicacion; los
+  secretos quedan en `.env` (gitignoreado), las publicas van on-chain.
+- IDs en `deployments/testnet.json`. Verificado leyendo el estado de la red.
 
-**Listo cuando:** el workspace entero compila, todos los tests verdes, wasm generado.
-
-### F1 - Contratos correctos (D2-D5)
-- **Atar la firma al usuario.** Mensaje pasa de `quest_id || nonce` a
-  `quest_id || nonce || user.to_xdr(env)`. Cierra el front-running: la prueba deja
-  de ser al portador. (`to_xdr` verificado en el SDK; `to_payload` NO sirve, esta
-  tras el feature `hazmat-address` y su doc desaconseja este uso.)
-- **SEP-41 completo** en wq-token: falta `allowance`, `approve`, `transfer_from`,
-  `burn_from`. Criterio de evaluacion directo ("uso claro y correcto de Stellar") y
-  requisito para que wallets y explorers lo muestren bien. Ojo: en 27.0.6 el `to`
-  de `transfer` es `MuxedAddress`, no `Address`.
-- **TTL.** Nadie extiende el instance storage (`Admin`, `TotalSupply`, `Owner`,
-  `Token`) ni las entradas `Quest`. Si el contrato se archiva, la demo muere.
-- **Tests:** camino feliz; firma invalida; nonce reusado; prueba de otro usuario
-  (el que demuestra el fix); quest inactiva; mint por no-admin; redeem completo con
-  el arbol de auth y verificacion del 5% quemado.
-
-**Listo cuando:** ambos contratos completos y la suite cubre los tres ataques.
-
-### F2 - Deploy a testnet (D6-D7)
-- `scripts/deploy-testnet.sh`: build optimizado, deploy de ambos contratos,
-  `initialize` de cada uno, QuestManager como admin del token, y registro de 3
-  quests reales de Santiago.
-- Bloqueado por la restriccion de red (ver arriba).
-
-**Listo cuando:** dos contract IDs vivos en testnet con quests registradas.
-
-### F3 - Firmante y cableado (D8-D11)
+### F3 - Firmante y cableado — **lo que sigue**
 - Adapter SSR de Astro (node).
 - `POST /api/location/challenge` emite nonce con expiracion.
 - `POST /api/location/sign` valida el nonce y firma `quest_id || nonce || address`.
-- Llaves ed25519 por quest en variables de entorno. **Nunca en el repo.**
+  La logica de firma ya esta escrita y probada en `scripts/smoke-testnet.mjs`.
+- Llaves ed25519 por quest desde `.env`. **Nunca en el repo.**
 - `scan.astro`: leer QR -> challenge -> firma -> transaccion.
 - `wallet.astro`: balance real leido del contrato.
 - Wallet del usuario: keypair en el navegador (decision cerrada, demo).
 
-**Listo cuando:** el recorrido completo funciona de punta a punta.
+**Listo cuando:** el recorrido completo funciona desde la app, no desde un script.
 
-### F4 - Demo y entrega (D12-D14)
+### F4 - Demo y entrega
 - Guion de demo, con los tres ataques como climax.
 - Video. README para el juez. Submission.
 
@@ -90,14 +69,15 @@ Dos salidas, en orden de preferencia:
 
 | Riesgo | Mitigacion |
 |---|---|
-| Deploy bloqueado por la red del entorno | Opcion A (allowlist) o script de un comando |
-| El arbol de auth de `redeem` falla | Test en F1, antes de cablear nada |
-| Disponibilidad del usuario para el deploy | Un solo comando, salida pegada de vuelta |
+| El arbol de auth de `redeem` falla desde el browser | Ya funciona con la cuenta del usuario como source; replicar eso en la app |
 | Camara/QR en movil | Fallback de codigo escrito a mano |
+| Contratos archivados antes de la demo | TTL de ~30 dias y se extiende en cada escritura |
+| Una llave de ubicacion se filtra | Es demo y estan en `.env`; regenerar con `new-location-keys.mjs` y re-registrar |
 
 ## Preguntas abiertas
 
-1. Habilitar los tres dominios de testnet en la politica de red del entorno? (opcion A)
-2. Indentacion: preferencia del usuario es tabs; los contratos actuales usan 4
-   espacios y rustfmt por defecto tambien. Se migra todo a tabs o se deja Rust como esta?
-3. Las 3 quests de Santiago a registrar: cuales?
+1. Las 3 quests de Santiago: cuales? Solo afecta nombre, foto y coordenadas en el
+   frontend - la cadena ya tiene las 3 registradas (5, 3 y 8 WQ).
+2. La wallet del usuario en el browser: keypair generado y guardado en
+   `localStorage`, o pedir que peguen una secreta de testnet? Lo primero es mas
+   demostrable; lo segundo evita hablar de custodia.
