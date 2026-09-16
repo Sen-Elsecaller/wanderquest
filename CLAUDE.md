@@ -18,19 +18,26 @@ General Track. Deadline de envío **2026-09-30 22:00 UTC**. Todo en **testnet**.
 
 Marca el estado real de cada pieza: `escrito` / `compila` / `testeado` / `deployado`.
 
-- **`contracts/wq-token`** — token WQ (fungible, admin-mint). Estado: **escrito, sin compilar**.
+- **`contracts/wq-token`** — token WQ (fungible, admin-mint). Estado: **compila, 4 tests pasan**.
+  Falta SEP-41 completo (`allowance`, `approve`, `transfer_from`, `burn_from`).
 - **`contracts/quest-manager`** — verifica firma ed25519 de la visita on-chain y acuña; maneja
-  canje con fee/quema. Estado: **escrito, sin compilar**.
+  canje con fee/quema. Estado: **escrito, NO compila** — `lib.rs:187` declara `mod test;` y
+  `src/test.rs` no existe (`error[E0583]`).
 - **Frontend** — landing + 5 pantallas mock. Estado: **hecho, sin cablear a cadena**.
-- **Toolchain** — Rust/stellar-cli **por instalar** en la máquina de trabajo. MCP `stellar-raven`
-  **por conectar** (verificación de API en vivo).
+- **Toolchain** — Rust 1.94 y target `wasm32v1-none` **listos en el contenedor**; `cargo test`
+  y el build a wasm corren acá. `stellar-cli` **por instalar**. MCP `stellar-raven`
+  **bloqueado acá** (403) — se conecta en el PC del usuario.
+- **Red** — la testnet **no es alcanzable desde el contenedor** (403 en horizon-testnet,
+  soroban-testnet y friendbot). Compilar y testear sí; **desplegar no**.
 
 **Decisiones cerradas** (no reabrir sin motivo nuevo): WQ = contrato Soroban (no asset
 clásico); wallet = keypair en la app (demo); alcance = profundidad sobre el flujo core;
-verificación de visita = firma ed25519 verificada on-chain; off-ramp a CLP = simulado.
+verificación de visita = firma ed25519 verificada on-chain; off-ramp a CLP = simulado;
+**la llave ed25519 de cada ubicación vive en un backend firmante** (nunca en el QR ni en un
+tag pasivo); **la prueba de visita se ata al usuario** — se firma `quest_id || nonce ||
+address`; meta = **top 3 al 2026-09-30**, no escalar antes de eso.
 
-**Abierto:** regla de reutilización del hackathon (¿proyecto desde cero?) sin respuesta oficial
-— el usuario confirma antes de entregar.
+**Abierto:** ver el final de `docs/plan.md`.
 
 ---
 
@@ -40,15 +47,16 @@ verificación de visita = firma ed25519 verificada on-chain; off-ramp a CLP = si
 - **Nada de `→` (flecha unicode) en código, comentarios, strings ni docs** — usar `->` ASCII.
   Evita problemas de encoding.
 - **Verificar antes de escribir Soroban/Stellar, nunca de memoria.** Ante cualquier duda de API
-  (soroban-sdk, stellar-cli, JS SDK, SEP), consultar el **MCP `stellar-raven`** o la doc oficial
-  antes de responder. El SDK evoluciona rápido; una firma inventada cuesta un ciclo de build.
+  (soroban-sdk, stellar-cli, JS SDK, SEP), leer la skill `.claude/skills/stellar-soroban/`:
+  dice dónde está el fuente del SDK vendorizado y la doc oficial clonada, ambos en disco.
+  El SDK evoluciona rápido; una firma inventada cuesta un ciclo de build.
 - **Yo cargo el peso.** Escribo todo el código: contratos, frontend, configs, tests, bindings,
-  docs. El usuario decide, corre los comandos (`cargo`/`stellar`/`npm`) con `!`, firma
-  transacciones, registra y entrega. Le paso los comandos listos y me pasa la salida/errores.
-- **No compilo ni deployo yo** (es su máquina) — aviso cuando algo queda listo; él compila y
-  me pasa los errores si los hay.
-- **Commit y push solo cuando el usuario lo pide**, avisando antes. Nunca tocar la rama por
-  defecto directo: rama nueva.
+  docs. **Compilo, corro los tests e itero en el contenedor hasta que pase todo** — no le paso
+  errores de compilación al usuario. Él decide, revisa y corre el deploy.
+- **El deploy es del usuario** mientras la testnet siga bloqueada acá. Se le entrega un script
+  de un comando y me pasa la salida.
+- **Commit y push a `master`** cuando el usuario lo pide o cuando el hook de cierre lo exija;
+  avisando siempre qué se commiteó y por qué.
 - **No documentar una implementación como funcional hasta que compile y se pruebe.** Se escribe
   el estado real (ver arriba). Un doc sobre una suposición se lee después como un hecho.
 - **Preguntar antes de asumir.** Si una instrucción, tarea o consulta no queda clara, preguntar.
@@ -81,11 +89,17 @@ verificación de visita = firma ed25519 verificada on-chain; off-ramp a CLP = si
 
 Documentación de referencia viva, no bitácora. Cuando algo cambia, **editar el texto existente
 in-place** y barrer el doc por lo que quedó desactualizado — no acumular secciones por sesión.
+**Excepción: `docs/bitacora.md`** es histórico y append-only; ahí sí se agrega por sesión.
 
 ### `CLAUDE.md` es instrucciones + router, no la enciclopedia
 
-Se carga entero en cada turno. El detalle profundo (specs de contrato, guía de deploy, mapa de
-componentes) vive en su propio archivo cuando haga falta; acá va lo que se necesita siempre.
+Se carga entero en cada turno. El detalle profundo vive en su propio archivo:
+
+| Dónde | Qué |
+|---|---|
+| `docs/plan.md` | Plan al 2026-09-30, fases, riesgos, preguntas abiertas |
+| `docs/bitacora.md` | Histórico de sesiones: decisiones, verificaciones, hallazgos |
+| `.claude/skills/stellar-soroban/` | Cómo verificar APIs de Soroban y qué cambió en 27.x |
 
 ---
 
@@ -98,10 +112,13 @@ wanderquest/
 │   ├── layouts/              # Layout (web) y AppLayout (app móvil)
 │   ├── pages/                # / (landing) y /app/* (5 pantallas)
 │   └── styles/global.css     # Tailwind v4 (@theme) + estilos app
-├── contracts/                # Workspace Rust/Soroban (NUEVO)
+├── contracts/                # Workspace Rust/Soroban
 │   ├── Cargo.toml            # workspace + perfil release para Wasm
+│   ├── Cargo.lock            # fija soroban-sdk 27.0.6 — commiteado a propósito
 │   ├── wq-token/             # token WQ
 │   └── quest-manager/        # verificación de visita + acuñación + canje
+├── docs/                     # plan y bitácora
+├── .claude/skills/           # skills del proyecto
 ├── public/                   # assets (logos, imágenes, HTMLs de referencia)
 └── package.json
 ```
@@ -111,9 +128,9 @@ wanderquest/
 | Capa | Tecnología |
 |------|------------|
 | Frontend | Astro 5 · Tailwind CSS v4 (`@theme`) · GSAP/ScrollTrigger · Vanta.js + Three |
-| Contratos | Rust >= 1.84 · soroban-sdk 27 · target `wasm32v1-none` |
-| Tooling | stellar-cli 28 · MCP `stellar-raven` (verificación de docs/tooling en vivo) |
-| Red | Stellar **testnet** |
+| Contratos | Rust 1.94 · soroban-sdk **27.0.6** (fijado en `Cargo.lock`) · target `wasm32v1-none` |
+| Tooling | `stellar-cli` por instalar · doc oficial clonada en `/home/user/stellar/stellar-docs` |
+| Red | Stellar **testnet** — inalcanzable desde el contenedor, ver skill |
 
 ## Arquitectura on-chain
 
@@ -121,12 +138,20 @@ wanderquest/
   `admin` puede acuñar; el admin es el `QuestManager`, así que WQ nuevo solo nace de una visita
   verificada.
 - **`QuestManager`** — el CPVV. Cada quest tiene la **clave pública ed25519** de su ubicación. Al
-  completar, el usuario envía una firma sobre `quest_id || nonce`; el contrato la **verifica
-  on-chain** (`env.crypto().ed25519_verify`) antes de acuñar la recompensa. El `nonce` usado queda
+  completar, el usuario envía una firma; el contrato la **verifica on-chain**
+  (`env.crypto().ed25519_verify`) antes de acuñar la recompensa. El `nonce` usado queda
   marcado (anti-replay). `redeem` mueve WQ del usuario al comercio y quema el 5% (fee de
   recirculación del modelo económico).
-- **Limitación MVP conocida:** la firma se ata a la quest, no al usuario — quien mande una prueba
-  fresca primero la reclama. Fix de producción: incluir la clave del usuario en el mensaje firmado.
+- **Mensaje firmado.** Hoy el código firma `quest_id || nonce`, lo que deja la prueba **al
+  portador**: quien la vea o la reciba por mensajería la cobra. Decidido en F1 pasar a
+  `quest_id || nonce || user.to_xdr(env)`. Pendiente de implementar.
+- **Verificación de visita: challenge-response.** El QR lleva `quest_id` y un nonce rotativo,
+  nunca la llave. Un backend firmante custodia la llave ed25519 de cada ubicación, valida el
+  nonce y firma incluyendo la address de quien reclama. Si la llave estuviera en el QR o en un
+  tag pasivo, quien lo fotografía acuña desde su casa para siempre y el CPVV se cae.
+- **Limitación honesta que queda:** el GPS es falsificable. Lo que el sistema prueba es posesión
+  de una firma emitida por el firmante del local; la calidad de la prueba depende de cuán
+  estricto sea ese firmante. Se documenta, no se esconde.
 
 ## Modelo Económico (referencia)
 
