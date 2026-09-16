@@ -1,0 +1,18 @@
+[package]
+name = "quest-manager"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+wq-token = { path = "../wq-token" }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+wq-token = { path = "../wq-token" }
+ed25519-dalek = "2"

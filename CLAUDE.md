@@ -1,297 +1,148 @@
-# WanderQuest Astro — Contexto del Proyecto
+# WanderQuest
 
-## Resumen
-WanderQuest es una plataforma de exploración urbana gamificada. Los usuarios descubren lugares, completan misiones físicas y ganan tokens canjeables en comercios locales. Construido sobre Stellar blockchain.
+Plataforma de exploración urbana gamificada sobre **Stellar**. Completás quests físicas
+(QR/geo), ganás tokens **WQ** canjeables en comercios locales. El modelo es **CPVV** (cost
+per verified visit): el comercio paga por visitas reales verificadas, no por métricas
+infladas.
 
-**Estado:** Landing page completa + Prototipo de app móvil navegable (5 pantallas).
+**Qué existe hoy:** landing page + prototipo de app móvil navegable (5 pantallas), puro
+frontend. **Qué estamos construyendo:** la capa on-chain real — que WQ sea un token de
+verdad y que "visita verificada -> acuñar -> canjear" liquide en la red.
+
+**Objetivo inmediato:** submission para el hackathon **"Find Your Way"** (Stellar Passport),
+General Track. Deadline de envío **2026-09-30 22:00 UTC**. Todo en **testnet**.
 
 ---
 
-## Stack Técnico
+## Estado del proyecto (temporal — actualizar al avanzar)
 
-| Tecnología | Uso |
-|------------|-----|
-| **Astro 5.17** | Framework principal (static output) |
-| **Tailwind CSS v4** | Estilos con `@theme` en global.css |
-| **GSAP + ScrollTrigger** | Animaciones scroll-driven con pinning (JourneyMap) |
-| **Vanta.js + Three.js** | Fondos 3D animados (Hero con GLOBE, Sponsors con FOG) |
-| **Material Icons Round** | Iconografía para app móvil |
-| **Plus Jakarta Sans** | Tipografía para app móvil |
+Marca el estado real de cada pieza: `escrito` / `compila` / `testeado` / `deployado`.
+
+- **`contracts/wq-token`** — token WQ (fungible, admin-mint). Estado: **escrito, sin compilar**.
+- **`contracts/quest-manager`** — verifica firma ed25519 de la visita on-chain y acuña; maneja
+  canje con fee/quema. Estado: **escrito, sin compilar**.
+- **Frontend** — landing + 5 pantallas mock. Estado: **hecho, sin cablear a cadena**.
+- **Toolchain** — Rust/stellar-cli **por instalar** en la máquina de trabajo. MCP `stellar-raven`
+  **por conectar** (verificación de API en vivo).
+
+**Decisiones cerradas** (no reabrir sin motivo nuevo): WQ = contrato Soroban (no asset
+clásico); wallet = keypair en la app (demo); alcance = profundidad sobre el flujo core;
+verificación de visita = firma ed25519 verificada on-chain; off-ramp a CLP = simulado.
+
+**Abierto:** regla de reutilización del hackathon (¿proyecto desde cero?) sin respuesta oficial
+— el usuario confirma antes de entregar.
+
+---
+
+## Reglas de Interacción
+
+- Conciso. Sacrificar gramática por concisión.
+- **Nada de `→` (flecha unicode) en código, comentarios, strings ni docs** — usar `->` ASCII.
+  Evita problemas de encoding.
+- **Verificar antes de escribir Soroban/Stellar, nunca de memoria.** Ante cualquier duda de API
+  (soroban-sdk, stellar-cli, JS SDK, SEP), consultar el **MCP `stellar-raven`** o la doc oficial
+  antes de responder. El SDK evoluciona rápido; una firma inventada cuesta un ciclo de build.
+- **Yo cargo el peso.** Escribo todo el código: contratos, frontend, configs, tests, bindings,
+  docs. El usuario decide, corre los comandos (`cargo`/`stellar`/`npm`) con `!`, firma
+  transacciones, registra y entrega. Le paso los comandos listos y me pasa la salida/errores.
+- **No compilo ni deployo yo** (es su máquina) — aviso cuando algo queda listo; él compila y
+  me pasa los errores si los hay.
+- **Commit y push solo cuando el usuario lo pide**, avisando antes. Nunca tocar la rama por
+  defecto directo: rama nueva.
+- **No documentar una implementación como funcional hasta que compile y se pruebe.** Se escribe
+  el estado real (ver arriba). Un doc sobre una suposición se lee después como un hecho.
+- **Preguntar antes de asumir.** Si una instrucción, tarea o consulta no queda clara, preguntar.
+- **Fin de cada plan: listar las preguntas abiertas, muy conciso.**
+- **Ante una idea de implementación a medias**, 3 pasos en orden: (1) analizar mejoras, huecos,
+  casos no cubiertos, alternativas más simples; (2) consultar las dudas necesarias; (3) solo si
+  no hay dudas ni mejoras, describir cómo se implementaría sin tocar código. No saltar a proponer
+  con información incompleta.
+- **No tratar lo ya construido como restricción fija** al analizar algo nuevo — todo lo previo
+  puede moldearse si un nuevo paradigma lo pide. Excepción: lo que el usuario marque como fijo.
+- **Modo conversación de diseño/ideas** — lo dispara el usuario o el tema (concepto, economía del
+  token, UX, gameplay, narrativa). Ahí se resuelve en términos de diseño y valor para el usuario
+  final, no de costo. "Ya existe", "reusa X", "es casi gratis" no hacen una idea mejor ni peor.
+  Un dato del repo corrige un hecho, no rankea una opción. Al buscar referencias, barrer todo, no
+  la carpeta obvia. Se sale del modo al pasar a *cómo* construirlo.
+- **Ante un "¿por qué?" explicar genuinamente** — el foco es la explicación técnica real, no
+  asumir que es una corrección.
+- **Un comentario describe el código como está, no cómo llegó a estar.** Alarma: "antes", "ya no",
+  "pasó a ser", o mencionar algo que no está en el archivo. Reescribir en presente.
+- **Leer antes de editar** — el archivo/módulo completo (imports incluidos) antes de modificar o
+  afirmar que algo no existe.
+- **Casos concretos primero.** La infra compartida sale de duplicados reales, no por adelantado.
+- **Usar features actuales con confianza** (soroban-sdk 27, stellar-cli 28, Astro 5, Tailwind v4),
+  sin disclaimers de "a verificar" una vez confirmada la API.
+- **Todo en testnet.** Nunca mainnet ni fondos reales salvo pedido explícito del usuario.
+- **Nunca exponer ni enviar claves secretas.** Las claves las custodia el usuario; la clave de
+  firma de ubicación (ed25519) es material sensible aunque sea demo.
+
+### Estilo de los `.md`
+
+Documentación de referencia viva, no bitácora. Cuando algo cambia, **editar el texto existente
+in-place** y barrer el doc por lo que quedó desactualizado — no acumular secciones por sesión.
+
+### `CLAUDE.md` es instrucciones + router, no la enciclopedia
+
+Se carga entero en cada turno. El detalle profundo (specs de contrato, guía de deploy, mapa de
+componentes) vive en su propio archivo cuando haga falta; acá va lo que se necesita siempre.
 
 ---
 
 ## Estructura del Proyecto
 
 ```
-wanderquest-astro/
-├── public/
-│   ├── wanderquest-logo.png       # Logo WanderQuest (128x128)
-│   ├── stellar-logo-small.png     # Logo Stellar (48x41, aspect ratio correcto)
-│   ├── cerro-santa-lucia-small.png # Imagen quest (400x400)
-│   └── reference app/             # HTMLs de referencia originales (no usados)
-├── src/
-│   ├── components/
-│   │   ├── landing/
-│   │   │   ├── Navbar.astro        # Nav oculto, aparece al scroll (con logo real)
-│   │   │   ├── Hero.astro          # Hero inmersivo con Vanta.js GLOBE + badge Stellar
-│   │   │   ├── JourneyMap.astro    # Ruta con dashes animados (5 pasos) + pinning
-│   │   │   ├── ForWho.astro        # Sección "Dos mundos" (exploradores/negocios)
-│   │   │   ├── Sponsors.astro      # Ecosistema WQ + carrusel comercios (Vanta FOG)
-│   │   │   ├── BusinessCTA.astro   # CTA para comercios (formulario contacto)
-│   │   │   ├── FinalCTA.astro      # CTA para usuarios (newsletter)
-│   │   │   └── Footer.astro        # Footer con links y logos reales
-│   │   └── ui/
-│   │       └── AnimatedCompass.astro  # Brújula SVG animada
-│   ├── layouts/
-│   │   ├── Layout.astro            # Layout para landing page
-│   │   └── AppLayout.astro         # Layout para app móvil (incluye BottomNav + logo)
-│   ├── pages/
-│   │   ├── index.astro             # Landing page
-│   │   └── app/
-│   │       ├── index.astro         # Mapa con quests cercanas
-│   │       ├── quest.astro         # Detalle de quest (con imagen real)
-│   │       ├── scan.astro          # Scanner QR con estado de éxito
-│   │       ├── wallet.astro        # Billetera con balance y retiro
-│   │       └── profile.astro       # Perfil con stats y logros
-│   └── styles/
-│       └── global.css              # Tailwind + variables @theme + estilos app
-├── package.json
-└── CLAUDE.md                       # Este archivo
+wanderquest/
+├── src/                      # Astro: landing + app (frontend, ya existe)
+│   ├── components/landing/   # Secciones de la landing
+│   ├── layouts/              # Layout (web) y AppLayout (app móvil)
+│   ├── pages/                # / (landing) y /app/* (5 pantallas)
+│   └── styles/global.css     # Tailwind v4 (@theme) + estilos app
+├── contracts/                # Workspace Rust/Soroban (NUEVO)
+│   ├── Cargo.toml            # workspace + perfil release para Wasm
+│   ├── wq-token/             # token WQ
+│   └── quest-manager/        # verificación de visita + acuñación + canje
+├── public/                   # assets (logos, imágenes, HTMLs de referencia)
+└── package.json
 ```
 
----
+## Stack y Versiones
 
-## Rutas de la Aplicación
+| Capa | Tecnología |
+|------|------------|
+| Frontend | Astro 5 · Tailwind CSS v4 (`@theme`) · GSAP/ScrollTrigger · Vanta.js + Three |
+| Contratos | Rust >= 1.84 · soroban-sdk 27 · target `wasm32v1-none` |
+| Tooling | stellar-cli 28 · MCP `stellar-raven` (verificación de docs/tooling en vivo) |
+| Red | Stellar **testnet** |
 
-| Ruta | Descripción |
-|------|-------------|
-| `/` | Landing page |
-| `/app` | Mapa con quests cercanas (home de la app) |
-| `/app/quest` | Detalle de una quest |
-| `/app/scan` | Scanner QR con overlay de éxito |
-| `/app/wallet` | Billetera, balance WQ, retiro a dinero real |
-| `/app/profile` | Perfil de usuario, stats, logros |
+## Arquitectura on-chain
 
-**Navegación:** El botón "Descarga la app" en el Navbar redirige a `/app`.
+- **`WQToken`** — fungible, 7 decimales. Balances en storage persistente con bump de TTL. Solo el
+  `admin` puede acuñar; el admin es el `QuestManager`, así que WQ nuevo solo nace de una visita
+  verificada.
+- **`QuestManager`** — el CPVV. Cada quest tiene la **clave pública ed25519** de su ubicación. Al
+  completar, el usuario envía una firma sobre `quest_id || nonce`; el contrato la **verifica
+  on-chain** (`env.crypto().ed25519_verify`) antes de acuñar la recompensa. El `nonce` usado queda
+  marcado (anti-replay). `redeem` mueve WQ del usuario al comercio y quema el 5% (fee de
+  recirculación del modelo económico).
+- **Limitación MVP conocida:** la firma se ata a la quest, no al usuario — quien mande una prueba
+  fresca primero la reclama. Fix de producción: incluir la clave del usuario en el mensaje firmado.
 
----
+## Modelo Económico (referencia)
 
-## Paleta de Colores (Ocean Quest)
+- WQ **fungible**, canjeable en cualquier comercio aliado. **1 WQ ≈ 100 CLP ≈ $0.10 USD**.
+- Fees (destino WanderQuest): depósito de comercio 10%, recirculación 5% (se quema), retiro de
+  usuario 20%, canje 0% para el usuario.
+- Todo número es provisional hasta tener algo sólido y jugable.
 
-```css
-/* Landing */
---color-primary: #0891B2;      /* Teal - principal */
---color-accent: #F97316;       /* Coral - acento */
---color-navy: #0B1E4A;         /* Navy - texto heading */
---color-off-white: #F6F7FA;    /* Fondo principal */
+## Pantallas de la app (`/app/*`)
 
-/* App móvil - adicionales */
---color-background-light: #F5F8F8;
---color-surface-light: #FFFFFF;
---color-gold: #FBBF24;
---color-neutral-50 a neutral-900;  /* Escala de grises teal */
-```
+`index` (mapa con quests) · `quest` (detalle) · `scan` (scanner QR + éxito) · `wallet` (balance,
+retiro) · `profile` (stats, logros). En el MVP se cablean a cadena: **wallet** (balance real),
+**scan** (acuñar por visita verificada) y el flujo de **canje**; mapa y perfil quedan como UI.
 
----
+## Paleta y Fuentes
 
-## Fuentes
-
-| Contexto | Fuente | Weights |
-|----------|--------|---------|
-| Landing headings | Montserrat | 700-900 |
-| Landing body | Inter | 400-600 |
-| App móvil | Plus Jakarta Sans | 400-800 |
-
----
-
-## Modelo Económico (Pool Común)
-
-### Concepto
-Los WQ son **fungibles** — el usuario puede canjearlos en **cualquier comercio aliado**, no solo donde los ganó.
-
-### Roles de Comercios
-1. **Sponsor**: Financia quests para atraer clientes
-2. **Punto de Canje**: Acepta WQ como pago
-3. **Ambos**: Financia y acepta WQ
-
-### Estructura de Fees
-| Operación | Fee | Destino |
-|-----------|-----|---------|
-| Depósito de comercio | 10% | WanderQuest |
-| Recirculación de WQ | 5% | WanderQuest (se queman) |
-| Retiro de usuario | 20% | WanderQuest |
-| Canje en comercio | 0% | Sin fee para usuario |
-
-### Valores
-- **1 WQ ≈ 100 CLP ≈ $0.10 USD**
-- Quest típica: 20-50 WQ
-- Balance ejemplo: 250 WQ
-
----
-
-## App Móvil — Detalles
-
-### AppLayout.astro
-Layout compartido para todas las páginas de `/app`. Incluye:
-- Bottom navigation con 5 tabs (Mapa, Mis Quests, Escanear, Billetera, Perfil)
-- FAB central para escanear
-- Contenedor `max-w-md` para simular móvil en desktop
-- Logo WanderQuest en fondo de desktop
-- Props: `activeTab`, `showBottomNav`, `title`
-
-### Páginas
-
-**index.astro (Mapa)**
-- Mapa simulado con patrón CSS
-- Marcadores de quests (teal, coral para limitados, gold para narrativas)
-- Barra de búsqueda
-- Filtros: Todos, Narrativa, Limitados, Ofertas Especiales
-- Cards horizontales de quests cercanas
-
-**quest.astro (Detalle)**
-- Hero con imagen real (Cerro Santa Lucía)
-- Badge "Quest Narrativa"
-- Stats: distancia, dificultad, duración
-- Recompensa: 50 WQ (~$5.000 CLP)
-- Sponsor integrado como financiador
-- CTA "Iniciar Quest"
-
-**scan.astro (Scanner)**
-- Viewfinder con animación de escaneo
-- Indicador AR flotante
-- Panel de objetivo actual
-- Overlay de éxito: "Canjéalos en cualquier comercio aliado"
-- Click para toggle entre estados (demo)
-
-**wallet.astro (Billetera)**
-- Card de balance: 250 WQ ≈ $25.000 CLP
-- Badge "STELLAR NETWORK"
-- Botón "Retirar a dinero real (fee 20%)"
-- Texto: "Canjeable en todos los comercios aliados"
-- Mapa de socios cercanos
-- Carrusel de ofertas destacadas
-- Historial de transacciones
-
-**profile.astro (Perfil)**
-- Card de perfil con avatar y nivel
-- Barra de XP
-- Balance WQ con equivalente CLP
-- Stats: 47 quests, 12 rutas
-- Ranking Santiago (#34)
-- Grid de logros (3 desbloqueados, 3 bloqueados)
-- Quests recientes
-
----
-
-## Landing Page — Secciones
-
-### Hero.astro
-- Vanta.js GLOBE animado
-- Badge "Powered by Stellar" con logo real
-
-### JourneyMap.astro
-- GSAP ScrollTrigger con pinning
-- 90 dashes animados
-- 5 checkpoints (paso 5: "canjéalos en cualquier comercio aliado — o retíralos como dinero real")
-- 5 floating features (sin "Crea tus quests")
-
-### ForWho.astro
-- Sección "Dos mundos": Exploradores (teal) y Negocios (coral)
-
-### Sponsors.astro
-- Fondo navy con Vanta.js FOG
-- Diagrama de ecosistema: Comercio → Pool Común → Explorador
-- Flecha de retorno "canje en cualquier comercio"
-- Carrusel de partners con navegación
-
-### BusinessCTA.astro
-- Gradiente coral (from-accent to-accent-dark)
-- Layout: Formulario izquierda, texto derecha
-- Formulario: nombre negocio, contacto, email, tipo
-- Beneficios: CPVV, red de comercios, dashboard
-
-### FinalCTA.astro
-- Gradiente teal (from-primary to-primary-dark)
-- Layout: Texto izquierda, formulario derecha
-- Newsletter para usuarios
-
-### Navbar.astro
-- Logo real de WanderQuest
-- CTA "Descarga la app" → `/app`
-
-### Footer.astro
-- Logo real de WanderQuest
-- Badge "Powered by Stellar" con logo real
-- Links de navegación y redes sociales
-
----
-
-## Comandos
-
-```bash
-# Desarrollo
-npm run dev          # Puerto 4322
-
-# Build
-npm run build
-
-# Preview
-npm run preview
-```
-
----
-
-## Estilos App Móvil (global.css)
-
-```css
-/* Animaciones */
-.animate-pulse-ring    /* Marcador de ubicación */
-.scan-line             /* Línea de escaneo */
-
-/* Utilidades */
-.hide-scrollbar        /* Ocultar scrollbar */
-.glass-panel           /* Glassmorphism */
-.bg-map-pattern        /* Fondo de mapa simulado */
-
-/* Sombras */
---shadow-glass
---shadow-float
---shadow-soft
-```
-
----
-
-## Pendientes / Ideas Futuras
-
-- [x] ~~Mockup de app móvil para video pitch~~ (completado)
-- [x] ~~Consistencia económica en pantallas~~ (completado)
-- [x] ~~BusinessCTA para comercios~~ (completado)
-- [x] ~~Logos reales (WanderQuest, Stellar)~~ (completado)
-- [ ] FAQ section
-- [ ] Video pitch de 3 minutos
-- [ ] Optimizar carga de Vanta (lazy load)
-
----
-
-## Sesión 5 Mar 2026 — Cambios
-
-1. **Modelo Económico Pool Común**: Documentado y aplicado en todas las pantallas
-2. **JourneyMap**: Paso 5 actualizado, eliminado "Crea tus quests"
-3. **Sponsors.astro**: Rediseñado con diagrama de ecosistema + Vanta FOG
-4. **BusinessCTA.astro**: Nuevo componente CTA para comercios
-5. **Logos reales**:
-   - `wanderquest-logo.png` (128x128) en Navbar, Footer, AppLayout
-   - `stellar-logo-small.png` (48x41, aspect ratio correcto) en Hero, Footer
-   - `cerro-santa-lucia-small.png` (400x400) en quest.astro
-6. **wallet.astro**: Botón retiro con fee, texto fungibilidad
-7. **scan.astro**: Mensaje éxito con "cualquier comercio aliado"
-8. **profile.astro**: Balance con equivalente CLP
-
----
-
-## Para Ver en Modo Móvil
-
-1. Abre http://localhost:4322/app
-2. DevTools → Toggle Device Toolbar (F12 → Ctrl+Shift+M)
-3. Selecciona iPhone 14 o similar
-4. Navega entre pantallas con el bottom nav
+- Landing: `--color-primary #0891B2` (teal), `--color-accent #F97316` (coral),
+  `--color-navy #0B1E4A`, `--color-off-white #F6F7FA`. Fuentes: Montserrat (headings), Inter (body).
+- App móvil: fondo `#F5F8F8`, superficie `#FFFFFF`, `--color-gold #FBBF24`. Fuente: Plus Jakarta Sans.

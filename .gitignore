@@ -17,6 +17,15 @@ pnpm-debug.log*
 .env
 .env.production
 
+# rust / soroban contracts
+contracts/target/
+target/
+**/*.rs.bk
+*.wasm
+# stellar-cli local keys/config (never commit secrets)
+.stellar/
+.soroban/
+
 # macOS-specific files
 .DS_Store
 
