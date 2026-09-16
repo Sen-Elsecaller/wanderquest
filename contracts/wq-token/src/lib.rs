@@ -1,16 +1,17 @@
 #![no_std]
-//! WQToken — the WanderQuest (WQ) fungible token as a Soroban contract.
+//! WQToken - the WanderQuest (WQ) fungible token as a Soroban contract.
 //!
 //! Minimal, self-contained fungible token: metadata, balances, transfer, mint,
-//! and burn. `mint` is gated to an `admin` address — in WanderQuest that admin
+//! and burn. `mint` is gated to an `admin` address - in WanderQuest that admin
 //! is the QuestManager contract, so the ONLY way new WQ comes into existence is
 //! through a cryptographically verified quest completion.
 //!
 //! Uses 7 decimals to match Stellar's classic asset convention (1 WQ = 1e7 stroops).
+//!
+//! Event shapes follow SEP-41: topics `["transfer", from, to]`, `["burn", from]`
+//! and `["mint", to]`, each carrying `amount: i128` as data.
 
-use soroban_sdk::{
-    contract, contractimpl, contracttype, symbol_short, Address, Env, String,
-};
+use soroban_sdk::{contract, contractevent, contractimpl, contracttype, Address, Env, String};
 
 const DECIMALS: u32 = 7;
 
@@ -25,6 +26,32 @@ enum DataKey {
     Admin,
     TotalSupply,
     Balance(Address),
+}
+
+#[contractevent(data_format = "single-value")]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Mint {
+    #[topic]
+    pub to: Address,
+    pub amount: i128,
+}
+
+#[contractevent(data_format = "single-value")]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Transfer {
+    #[topic]
+    pub from: Address,
+    #[topic]
+    pub to: Address,
+    pub amount: i128,
+}
+
+#[contractevent(data_format = "single-value")]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Burn {
+    #[topic]
+    pub from: Address,
+    pub amount: i128,
 }
 
 #[contract]
@@ -53,8 +80,7 @@ impl WQToken {
         let supply: i128 = Self::total_supply(env.clone()) + amount;
         env.storage().instance().set(&DataKey::TotalSupply, &supply);
 
-        env.events()
-            .publish((symbol_short!("mint"), to), amount);
+        Mint { to, amount }.publish(&env);
     }
 
     /// Transfer WQ from `from` to `to`. Requires `from`'s authorization.
@@ -69,8 +95,7 @@ impl WQToken {
         let to_balance = Self::read_balance(&env, &to) + amount;
         Self::write_balance(&env, &to, to_balance);
 
-        env.events()
-            .publish((symbol_short!("transfer"), from, to), amount);
+        Transfer { from, to, amount }.publish(&env);
     }
 
     /// Burn WQ from `from`. Requires `from`'s authorization. Reduces total supply.
@@ -85,8 +110,7 @@ impl WQToken {
         let supply: i128 = Self::total_supply(env.clone()) - amount;
         env.storage().instance().set(&DataKey::TotalSupply, &supply);
 
-        env.events()
-            .publish((symbol_short!("burn"), from), amount);
+        Burn { from, amount }.publish(&env);
     }
 
     // --- read-only views ---

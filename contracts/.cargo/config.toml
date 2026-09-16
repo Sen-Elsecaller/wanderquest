@@ -1,0 +1,6 @@
+# Host builds (cargo test) link the contracts as a cdylib. The mingw linker
+# exports every public symbol and overflows its 65535-ordinal limit on a
+# dependency tree this size. Nothing loads that DLL - the tests use the rlib -
+# so exporting none of them is free. Does not affect the wasm32v1-none build.
+[target.x86_64-pc-windows-gnu]
+rustflags = ["-C", "link-arg=-Wl,--exclude-all-symbols"]

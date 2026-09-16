@@ -1,28 +1,39 @@
 #![no_std]
-//! QuestManager — the brain of WanderQuest's "cost per verified visit" (CPVV) model.
+//! QuestManager - the brain of WanderQuest's "cost per verified visit" (CPVV) model.
 //!
-//! A quest has a physical location. Each location holds a secret ed25519 key
-//! (embedded in its QR / handed to its NFC tag / held by the sponsor's backend).
-//! When a user physically reaches the location and scans it, an off-chain signer
-//! produces an ed25519 signature over `quest_id || nonce`. The user submits that
-//! signature here, and this contract VERIFIES IT ON-CHAIN before minting WQ.
+//! Each quest has a physical location, and each location has an ed25519 key pair.
+//! The secret half lives in the location's signing backend; only the public half is
+//! stored here. When a user physically reaches the location and scans its QR, the
+//! backend signs `quest_id || nonce || user_address` and hands the signature back.
+//! The user submits it here, and this contract VERIFIES IT ON-CHAIN before minting WQ.
 //!
-//! So new WQ can only be created by proving possession of a location's secret —
-//! i.e. by actually being there. QuestManager is the admin of the WQToken, so it
-//! is the sole minter.
+//! Two properties fall out of that message:
+//!
+//! - **Only presence mints.** New WQ exists only if someone proved possession of a
+//!   signature from a location's signer. QuestManager is the admin of WQToken, so it
+//!   is the sole minter.
+//! - **A proof is not bearer paper.** The user's address is inside the signed bytes,
+//!   so a leaked or forwarded proof is worthless to anyone else. The nonce registry
+//!   stops the rightful owner from spending the same proof twice.
 //!
 //! Redemption (`redeem`) moves WQ from a user to a merchant and burns a 5%
 //! recirculation fee, matching the WanderQuest economic model.
-//!
-//! NOTE (MVP scope): a signed proof is bound to the quest, not to a specific user,
-//! so whoever submits a fresh proof first claims it. Production fix: include the
-//! user's key in the signed message. The nonce registry below still prevents any
-//! proof from being replayed twice.
 
 use soroban_sdk::{
-    contract, contractimpl, contracttype, symbol_short, Address, Bytes, BytesN, Env,
+    contract, contractclient, contractevent, contractimpl, contracttype, xdr::ToXdr, Address,
+    Bytes, BytesN, Env,
 };
-use wq_token::WQTokenClient;
+
+/// The slice of WQToken this contract calls. Declared as a trait rather than by
+/// depending on the `wq-token` crate: a crate dependency links the token's own
+/// contract exports into this Wasm, where they collide with this contract's
+/// (`initialize` has a different arity in each) and one of them is dropped.
+#[contractclient(name = "TokenClient")]
+pub trait TokenInterface {
+    fn mint(env: Env, to: Address, amount: i128);
+    fn transfer(env: Env, from: Address, to: Address, amount: i128);
+    fn burn(env: Env, from: Address, amount: i128);
+}
 
 // Fee, in basis points, burned on redemption (5%).
 const REDEEM_BURN_BPS: i128 = 500;
@@ -44,6 +55,29 @@ pub struct Quest {
     pub active: bool,
 }
 
+/// Emitted when a verified visit mints its reward.
+#[contractevent(data_format = "single-value")]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct QuestCompleted {
+    #[topic]
+    pub user: Address,
+    #[topic]
+    pub quest_id: u32,
+    pub reward: i128,
+}
+
+/// Emitted when a user spends WQ at a merchant.
+#[contractevent]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Redeemed {
+    #[topic]
+    pub user: Address,
+    #[topic]
+    pub merchant: Address,
+    pub amount: i128,
+    pub burned: i128,
+}
+
 #[contract]
 pub struct QuestManager;
 
@@ -61,12 +95,7 @@ impl QuestManager {
     }
 
     /// Register (or overwrite) a quest and the ed25519 public key of its location.
-    pub fn register_quest(
-        env: Env,
-        quest_id: u32,
-        location_pubkey: BytesN<32>,
-        reward: i128,
-    ) {
+    pub fn register_quest(env: Env, quest_id: u32, location_pubkey: BytesN<32>, reward: i128) {
         assert!(reward > 0, "reward must be positive");
         Self::require_owner(&env).require_auth();
         let quest = Quest {
@@ -74,19 +103,24 @@ impl QuestManager {
             reward,
             active: true,
         };
-        env.storage().persistent().set(&DataKey::Quest(quest_id), &quest);
+        env.storage()
+            .persistent()
+            .set(&DataKey::Quest(quest_id), &quest);
     }
 
     pub fn set_quest_active(env: Env, quest_id: u32, active: bool) {
         Self::require_owner(&env).require_auth();
         let mut quest = Self::get_quest(env.clone(), quest_id);
         quest.active = active;
-        env.storage().persistent().set(&DataKey::Quest(quest_id), &quest);
+        env.storage()
+            .persistent()
+            .set(&DataKey::Quest(quest_id), &quest);
     }
 
-    /// Complete a quest: verify the location's signature over `quest_id || nonce`,
-    /// then mint the quest reward in WQ to `user`. Reverts if the quest is
-    /// inactive, the nonce was already used, or the signature is invalid.
+    /// Complete a quest: verify the location's signature over
+    /// `quest_id || nonce || user`, then mint the quest reward in WQ to `user`.
+    /// Reverts if the quest is inactive, the nonce was already used, or the
+    /// signature does not match this exact message.
     pub fn complete_quest(
         env: Env,
         user: Address,
@@ -105,12 +139,8 @@ impl QuestManager {
             "proof already used"
         );
 
-        // Reconstruct the signed message: quest_id (big-endian) || nonce.
-        let mut message = Bytes::new(&env);
-        message.extend_from_array(&quest_id.to_be_bytes());
-        message.extend_from_array(&nonce.to_array());
-
-        // On-chain ed25519 verification — panics if the signature is invalid.
+        // On-chain ed25519 verification - panics if the signature is invalid.
+        let message = Self::visit_message(&env, quest_id, &nonce, &user);
         env.crypto()
             .ed25519_verify(&quest.location_pubkey, &message, &signature);
 
@@ -122,8 +152,12 @@ impl QuestManager {
         let token = Self::token_client(&env);
         token.mint(&user, &quest.reward);
 
-        env.events()
-            .publish((symbol_short!("completed"), user), quest_id);
+        QuestCompleted {
+            user,
+            quest_id,
+            reward: quest.reward,
+        }
+        .publish(&env);
     }
 
     /// Spend WQ at a merchant. Transfers 95% to the merchant and burns 5% as the
@@ -141,8 +175,13 @@ impl QuestManager {
             token.burn(&user, &burn_amount);
         }
 
-        env.events()
-            .publish((symbol_short!("redeem"), user, merchant), amount);
+        Redeemed {
+            user,
+            merchant,
+            amount,
+            burned: burn_amount,
+        }
+        .publish(&env);
     }
 
     // --- views ---
@@ -167,6 +206,17 @@ impl QuestManager {
 
     // --- helpers ---
 
+    /// The exact bytes a location's signer must sign: `quest_id` big-endian,
+    /// then the 32-byte nonce, then the XDR of the claiming user's address.
+    /// Binding the address is what keeps a proof from being transferable.
+    fn visit_message(env: &Env, quest_id: u32, nonce: &BytesN<32>, user: &Address) -> Bytes {
+        let mut message = Bytes::new(env);
+        message.extend_from_array(&quest_id.to_be_bytes());
+        message.extend_from_array(&nonce.to_array());
+        message.append(&user.clone().to_xdr(env));
+        message
+    }
+
     fn require_owner(env: &Env) -> Address {
         env.storage()
             .instance()
@@ -174,13 +224,13 @@ impl QuestManager {
             .expect("not initialized")
     }
 
-    fn token_client(env: &Env) -> WQTokenClient {
+    fn token_client(env: &Env) -> TokenClient<'_> {
         let token: Address = env
             .storage()
             .instance()
             .get(&DataKey::Token)
             .expect("not initialized");
-        WQTokenClient::new(env, &token)
+        TokenClient::new(env, &token)
     }
 }
 
