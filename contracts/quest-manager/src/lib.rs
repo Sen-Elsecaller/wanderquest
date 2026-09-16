@@ -38,6 +38,14 @@ pub trait TokenInterface {
 // Fee, in basis points, burned on redemption (5%).
 const REDEEM_BURN_BPS: i128 = 500;
 
+// Storage lifetimes, bumped on every touch. `instance()` covers the contract
+// instance and its code, so this is also what keeps the contract callable.
+const DAY_IN_LEDGERS: u32 = 17_280; // ~5s per ledger
+const INSTANCE_TTL_THRESHOLD: u32 = DAY_IN_LEDGERS * 20;
+const INSTANCE_TTL_BUMP: u32 = DAY_IN_LEDGERS * 30;
+const QUEST_TTL_THRESHOLD: u32 = DAY_IN_LEDGERS * 20;
+const QUEST_TTL_BUMP: u32 = DAY_IN_LEDGERS * 30;
+
 #[derive(Clone)]
 #[contracttype]
 enum DataKey {
@@ -92,29 +100,30 @@ impl QuestManager {
         }
         env.storage().instance().set(&DataKey::Owner, &owner);
         env.storage().instance().set(&DataKey::Token, &token);
+        Self::bump_instance(&env);
     }
 
     /// Register (or overwrite) a quest and the ed25519 public key of its location.
     pub fn register_quest(env: Env, quest_id: u32, location_pubkey: BytesN<32>, reward: i128) {
         assert!(reward > 0, "reward must be positive");
         Self::require_owner(&env).require_auth();
+        Self::bump_instance(&env);
+
         let quest = Quest {
             location_pubkey,
             reward,
             active: true,
         };
-        env.storage()
-            .persistent()
-            .set(&DataKey::Quest(quest_id), &quest);
+        Self::write_quest(&env, quest_id, &quest);
     }
 
     pub fn set_quest_active(env: Env, quest_id: u32, active: bool) {
         Self::require_owner(&env).require_auth();
+        Self::bump_instance(&env);
+
         let mut quest = Self::get_quest(env.clone(), quest_id);
         quest.active = active;
-        env.storage()
-            .persistent()
-            .set(&DataKey::Quest(quest_id), &quest);
+        Self::write_quest(&env, quest_id, &quest);
     }
 
     /// Complete a quest: verify the location's signature over
@@ -129,6 +138,7 @@ impl QuestManager {
         signature: BytesN<64>,
     ) {
         user.require_auth();
+        Self::bump_instance(&env);
 
         let quest = Self::get_quest(env.clone(), quest_id);
         assert!(quest.active, "quest is not active");
@@ -144,8 +154,13 @@ impl QuestManager {
         env.crypto()
             .ed25519_verify(&quest.location_pubkey, &message, &signature);
 
-        // Mark the proof spent so it can never be replayed.
+        // Mark the proof spent so it can never be replayed. An archived
+        // persistent entry cannot be re-created, only restored, so this record
+        // outlives its own TTL - the bump is to spare anyone that restore.
         env.storage().persistent().set(&nonce_key, &true);
+        env.storage()
+            .persistent()
+            .extend_ttl(&nonce_key, QUEST_TTL_THRESHOLD, QUEST_TTL_BUMP);
 
         // Mint the reward. QuestManager is the token admin, so it authorizes
         // this sub-invocation on its own behalf automatically.
@@ -165,6 +180,7 @@ impl QuestManager {
     pub fn redeem(env: Env, user: Address, merchant: Address, amount: i128) {
         assert!(amount > 0, "amount must be positive");
         user.require_auth();
+        Self::bump_instance(&env);
 
         let burn_amount = amount * REDEEM_BURN_BPS / 10_000;
         let pay_amount = amount - burn_amount;
@@ -187,10 +203,16 @@ impl QuestManager {
     // --- views ---
 
     pub fn get_quest(env: Env, quest_id: u32) -> Quest {
+        let key = DataKey::Quest(quest_id);
+        let quest: Quest = env
+            .storage()
+            .persistent()
+            .get(&key)
+            .expect("quest not found");
         env.storage()
             .persistent()
-            .get(&DataKey::Quest(quest_id))
-            .expect("quest not found")
+            .extend_ttl(&key, QUEST_TTL_THRESHOLD, QUEST_TTL_BUMP);
+        quest
     }
 
     pub fn token(env: Env) -> Address {
@@ -215,6 +237,20 @@ impl QuestManager {
         message.extend_from_array(&nonce.to_array());
         message.append(&user.clone().to_xdr(env));
         message
+    }
+
+    fn bump_instance(env: &Env) {
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_TTL_THRESHOLD, INSTANCE_TTL_BUMP);
+    }
+
+    fn write_quest(env: &Env, quest_id: u32, quest: &Quest) {
+        let key = DataKey::Quest(quest_id);
+        env.storage().persistent().set(&key, quest);
+        env.storage()
+            .persistent()
+            .extend_ttl(&key, QUEST_TTL_THRESHOLD, QUEST_TTL_BUMP);
     }
 
     fn require_owner(env: &Env) -> Address {
