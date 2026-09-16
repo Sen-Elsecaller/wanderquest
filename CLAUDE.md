@@ -37,7 +37,17 @@ verificación de visita = firma ed25519 verificada on-chain; off-ramp a CLP = si
 tag pasivo); **la prueba de visita se ata al usuario** — se firma `quest_id || nonce ||
 address`; meta = **top 3 al 2026-09-30**, no escalar antes de eso.
 
-**Abierto:** ver el final de `docs/plan.md`.
+**Abierto — decisiones del usuario, pendientes antes de avanzar:**
+
+1. **Red del entorno.** ¿Habilitar `horizon-testnet.stellar.org`, `soroban-testnet.stellar.org`
+   y `friendbot.stellar.org` en la política de red? Hoy dan 403. Si entran, el agente despliega
+   y verifica contra la red solo; si no, F2 queda bloqueada esperando al usuario.
+2. **Indentación en Rust.** La preferencia del usuario es tabs; `contracts/` usa 4 espacios y
+   rustfmt por defecto también. ¿Migrar todo a tabs o dejar Rust como está?
+3. **Las 3 quests de Santiago a registrar en testnet.** Cerro Santa Lucía ya tiene imagen en
+   `public/`; faltan dos.
+
+Ninguna bloquea F0. El resto de preguntas abiertas, al final de `docs/plan.md`.
 
 ---
 
