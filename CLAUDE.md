@@ -5,9 +5,10 @@ Plataforma de exploración urbana gamificada sobre **Stellar**. Completás quest
 per verified visit): el comercio paga por visitas reales verificadas, no por métricas
 infladas.
 
-**Qué existe hoy:** landing page + prototipo de app móvil navegable (5 pantallas), puro
-frontend. **Qué estamos construyendo:** la capa on-chain real — que WQ sea un token de
-verdad y que "visita verificada -> acuñar -> canjear" liquide en la red.
+**Qué existe hoy:** landing page + prototipo web de app móvil navegable (5 pantallas), y la
+capa on-chain real desplegada en testnet. **Qué estamos construyendo:** una **app Android de
+verdad** (Expo / React Native) donde "visita verificada -> acuñar -> canjear" liquida en la
+red, con la presencia física atada a un QR rotativo.
 
 **Objetivo inmediato:** submission para el hackathon **"Find Your Way"** (Stellar Passport),
 General Track. Deadline de envío **2026-09-30 22:00 UTC**. Todo en **testnet**.
@@ -28,30 +29,42 @@ Marca el estado real de cada pieza: `escrito` / `compila` / `testeado` / `deploy
   adapter node; solo `/api` es SSR, las páginas siguen estáticas). Estado: **funciona contra
   testnet** — `npm run smoke:signer`. Las llaves ed25519 de las 3 ubicaciones viven en `.env`
   (gitignoreado); sus públicas están registradas on-chain.
-- **Frontend** — landing + 5 pantallas mock. Estado: **hecho, sin cablear a cadena**. Es lo único
-  que falta de F3 y lo primero que toca diseño.
+- **Frontend web** — landing + 5 pantallas mock en Astro. Estado: **hecho, sin cablear a
+  cadena**. La landing se queda en la web; las 5 pantallas se portan a React Native.
+- **App móvil (Expo)** — **no existe todavía**. Es el grueso de lo que queda. Antes de escribir
+  la primera línea hay que cerrar arquitectura y patrones (ver preguntas abiertas).
 - **Toolchain** — todo corre en el PC del usuario (Windows): Rust 1.98.1 host `x86_64-pc-windows-gnu`,
-  target `wasm32v1-none`, `stellar-cli` 28.0.0, Node 24. No hay MSVC Build Tools; ver la nota del
-  linker en la skill. MCP `stellar-raven` no está conectado a la sesión (el host sí responde).
+  target `wasm32v1-none`, `stellar-cli` 28.0.0, Node 24.14.0, npm 11.9.0, **JDK 21.0.11**. **No hay
+  Android SDK ni `adb`** — el APK sale por EAS en la nube o se instala el SDK (pregunta abierta).
+  No hay MSVC Build Tools; ver la nota del linker en la skill. MCP `stellar-raven` no está
+  conectado a la sesión (el host sí responde).
 - **Red** — testnet **alcanzable**. Compilar, testear, desplegar y leer estado: todo desde acá.
 
 **Decisiones cerradas** (no reabrir sin motivo nuevo): WQ = contrato Soroban (no asset
-clásico); wallet = keypair en la app (demo); alcance = profundidad sobre el flujo core;
+clásico); wallet = keypair generado por la app, en `expo-secure-store` (demo); alcance =
+profundidad sobre el flujo core;
 verificación de visita = firma ed25519 verificada on-chain; off-ramp a CLP = simulado;
 **la llave ed25519 de cada ubicación vive en un backend firmante** (nunca en el QR ni en un
 tag pasivo); **la prueba de visita se ata al usuario** — se firma `quest_id || nonce ||
-address` (implementado y probado en vivo); **Rust queda en 4 espacios con rustfmt por
-defecto** (la preferencia de tabs del usuario aplica al resto); meta = **top 3 al
-2026-09-30**, no escalar antes de eso.
+address` (implementado y probado en vivo); **la app móvil es Expo / React Native**, APK Android
+— no Capacitor, no Kotlin, **iOS fuera de alcance** (necesita Mac); **el QR lo muestra una
+pantalla en el local y rota cada 30s**, la presencia tiene que ser real; **Rust queda en 4
+espacios con rustfmt por defecto** (la preferencia de tabs del usuario aplica al resto); meta =
+**top 3 al 2026-09-30**, no escalar antes de eso.
 
-**Abierto — decisiones del usuario:**
+**Abierto — a resolver al empezar la próxima sesión:**
 
-1. **Las 3 quests de Santiago.** Cerro Santa Lucía ya tiene imagen en `public/`; faltan dos.
-   No bloquea la cadena: el contrato solo guarda llave pública, recompensa y estado — el
-   nombre, la foto y las coordenadas viven en el frontend. Las quests 1, 2 y 3 ya están
-   registradas en testnet con 5, 3 y 8 WQ.
+1. **Arquitectura y patrones de la app, decididos ANTES de escribir.** El usuario pidió
+   explícitamente buena escritura y buena arquitectura: estructura, dónde vive el estado, cómo
+   se separa la capa de cadena de la UI. Se cierra antes del primer componente.
+2. **¿Claude Design primero para alguna parte?** A evaluar antes de portar las pantallas.
+3. **Build del APK:** EAS en la nube (pide cuenta de Expo) o Android SDK local.
+4. **Dónde se hostea el firmante** (HTTPS, vivo el día de la demo).
+5. **Las 3 quests de Santiago.** El usuario las decide después; se sigue con placeholders. No
+   bloquea la cadena: el contrato solo guarda llave pública, recompensa y estado. Las quests 1,
+   2 y 3 ya están registradas en testnet con 5, 3 y 8 WQ.
 
-El resto de preguntas abiertas, al final de `docs/plan.md`.
+La lista completa, al final de `docs/plan.md`.
 
 ---
 
@@ -151,9 +164,10 @@ wanderquest/
 
 | Capa | Tecnología |
 |------|------------|
-| Frontend | Astro 5 · Tailwind CSS v4 (`@theme`) · GSAP/ScrollTrigger · Vanta.js + Three |
+| Landing (web) | Astro 5 · Tailwind CSS v4 (`@theme`) · GSAP/ScrollTrigger · Vanta.js + Three |
+| App móvil | Expo / React Native — **por empezar**. `expo-camera`, `expo-secure-store` |
 | Contratos | Rust 1.98.1 · soroban-sdk **27.0.6** (fijado en `Cargo.lock`) · target `wasm32v1-none` |
-| Cadena (JS) | `@stellar/stellar-sdk` 17 · Node 24 |
+| Cadena (JS) | `@stellar/stellar-sdk` 17.1.0 · Node 24. Corre en React Native con un solo polyfill, `react-native-get-random-values` (sus deps —`@noble/ed25519`, `@noble/hashes`, `@stellar/js-xdr`— son JS puro sobre `Uint8Array`, sin `Buffer`) |
 | Tooling | `stellar-cli` **28.0.0** · doc oficial clonada en `C:\Users\Sen\stellar\stellar-docs` |
 | Red | Stellar **testnet**, alcanzable desde el PC — contratos ya desplegados |
 
@@ -172,13 +186,18 @@ wanderquest/
   del mensaje es lo que impide que la prueba sea al portador: una firma filtrada o reenviada no
   le sirve a nadie más. Del lado JS los mismos bytes salen de
   `Address.fromString(g).toScVal().toXDR()`.
-- **Verificación de visita: challenge-response.** El QR lleva `quest_id` y un nonce rotativo,
-  nunca la llave. Un backend firmante custodia la llave ed25519 de cada ubicación, valida el
-  nonce y firma incluyendo la address de quien reclama. Si la llave estuviera en el QR o en un
-  tag pasivo, quien lo fotografía acuña desde su casa para siempre y el CPVV se cae.
-- **Limitación honesta que queda:** el GPS es falsificable. Lo que el sistema prueba es posesión
-  de una firma emitida por el firmante del local; la calidad de la prueba depende de cuán
-  estricto sea ese firmante. Se documenta, no se esconde.
+- **Verificación de visita: challenge-response con QR rotativo.** Una pantalla en el local
+  (`/local/[quest_id]`) pide el nonce al firmante cada 30s y lo dibuja en el QR; el teléfono
+  solo puede conocerlo escaneándolo. `/challenge` no es público. Un backend firmante custodia
+  la llave ed25519 de cada ubicación, valida el nonce y firma incluyendo la address de quien
+  reclama. Si la llave estuviera en el QR o en un tag pasivo, quien lo fotografía acuña desde
+  su casa para siempre y el CPVV se cae. **Esto está decidido, no implementado**: hoy
+  `/challenge` recibe solo `quest_id` y cualquiera puede pedir un nonce desde su casa.
+- **Consecuencia de producto:** un QR rotativo no se puede imprimir; el comercio necesita una
+  pantalla.
+- **Limitaciones honestas que quedan:** el GPS es falsificable, y el **relay** sigue abierto
+  —quien está en el lugar puede pasar el QR por videollamada dentro de la ventana de 30s—.
+  Cerrarlo pide proximidad real (NFC o BLE), fuera de alcance. Se documenta, no se esconde.
 
 ## Modelo Económico (referencia)
 
@@ -190,8 +209,10 @@ wanderquest/
 ## Pantallas de la app (`/app/*`)
 
 `index` (mapa con quests) · `quest` (detalle) · `scan` (scanner QR + éxito) · `wallet` (balance,
-retiro) · `profile` (stats, logros). En el MVP se cablean a cadena: **wallet** (balance real),
-**scan** (acuñar por visita verificada) y el flujo de **canje**; mapa y perfil quedan como UI.
+retiro) · `profile` (stats, logros). Hoy son Astro; se portan a React Native. **`scan.astro`
+tiene una cámara simulada**, no un scanner. En el MVP se cablean a cadena: **wallet** (balance
+real), **scan** (acuñar por visita verificada) y el flujo de **canje**; mapa y perfil quedan
+como UI.
 
 ## Paleta y Fuentes
 

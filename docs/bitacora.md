@@ -12,7 +12,7 @@ Para historial más viejo, buscar por texto o por tag.
 kebab-case, sin tildes, a nivel sistema/módulo.
 
 `#contracts` `#token` `#quest-manager` `#sep-41` `#security` `#deploy` `#testnet`
-`#signer` `#frontend` `#tooling` `#docs` `#process-rules`
+`#signer` `#frontend` `#mobile` `#tooling` `#docs` `#process-rules`
 
 **La fecha es la del día, y punto.** No se deduce de la última entrada ni se incrementa. Si
 ya hay una entrada de hoy, la nueva es `(Sesión 2)`, `(Sesión 3)` en el título. La semana se
@@ -25,6 +25,103 @@ corregirla, no acomodar la nueva alrededor. `git log` la verifica.
 ---
 
 ## Semana 14 - 20 de septiembre
+
+### Sesión: 2026-09-17 — La app se vuelve nativa, y el QR deja de ser decorativo
+
+**Tags:** #mobile #frontend #security #signer #tooling #docs
+
+Sesión sin una línea de código: se fue entera en dos preguntas del usuario que resultaron ser
+las dos decisiones más grandes que quedaban. La primera —*"entiendo que sería nativa de
+Android, no desde el navegador"*— destapó que nadie había decidido eso nunca. La segunda
+—*"¿qué tal React Expo para esto?"*— dio vuelta la recomendación que yo mismo acababa de dar.
+
+#### El hueco que estaba a la vista y nadie miró
+
+Revisando qué tendría que hacer `scan`, salió que el `CLAUDE.md` decía una cosa y el código
+hacía otra. El doc: *"el QR lleva `quest_id` y un nonce rotativo"*. `challenge.ts`: recibe
+**sólo `quest_id`** y emite el nonce él mismo.
+
+Los quest_id son 1, 2 y 3. O sea que desde cualquier lado se pide un nonce, se pide la firma
+con la address propia, y se acuña. **Nunca hay que ir al Cerro Santa Lucía.** El anti-replay y
+la intransferibilidad funcionan perfecto; lo que no estaba atado a nada era la presencia
+física, que es literalmente el producto. El CPVV entero descansaba sobre un QR que no aportaba
+ningún secreto.
+
+El arreglo no necesita contratos nuevos ni firmante nuevo: **se invierte quién pide el
+nonce.** Una pantalla en el local (`/local/[quest_id]`) llama a `/challenge` cada 30 segundos
+y dibuja el QR; el teléfono sólo puede conocer ese nonce escaneándolo. `/challenge` deja de
+ser público. El nonce vive 30 segundos, existe únicamente en una pantalla que está físicamente
+en el lugar, y se gasta al primer uso.
+
+Dos consecuencias que se escriben, no se esconden:
+
+- **Un QR rotativo no se puede imprimir.** El comercio necesita una pantalla —una tablet
+  vieja, un teléfono—. En la demo eso juega a favor (el QR cambiando en cámara es el
+  argumento), pero en el modelo real es un costo por local.
+- **El relay sigue abierto.** Alguien parado en el cerro le pasa el QR por videollamada a un
+  amigo y el amigo acuña. Cerrarlo pide proximidad real, NFC o BLE, y queda fuera de alcance.
+  Pero el ataque pasó de *"cualquiera, desde su casa, para siempre"* a *"necesitás un cómplice
+  presente y coordinado en una ventana de 30 segundos"*. Esa diferencia es el producto.
+
+#### Nativa: primero Capacitor, después Expo, y por qué cambió
+
+El estado real era que la app no existía: las cinco pantallas son Astro + Tailwind, y
+`scan.astro` tenía una **cámara simulada** —un div con un marco y texto, sin `getUserMedia`—.
+
+La primera recomendación fue **Capacitor**: envolver el frontend que ya existe en un APK,
+ganando ML Kit para el QR y Android Keystore para la llave secreta —que de paso arregla solo
+el punto flojo de la wallet, porque `localStorage` se lo lleva cualquier XSS—. Kotlin nativo
+quedó descartado por una razón que no es el tiempo: obligaría a migrar a `java-stellar-sdk` y
+re-verificar todo el armado de transacciones Soroban, que es justo la parte delicada y ya
+probada contra la red.
+
+Entonces el usuario preguntó por Expo, y **la suposición que iba a costar la decisión era
+mía**: di por hecho que `@stellar/stellar-sdk` no sobreviviría a React Native, porque esas
+libs históricamente arrastran `Buffer`, `crypto` y `sodium-native`. Mirar el
+`package.json` en vez de confiar en la memoria dijo otra cosa:
+
+| Dependencia de stellar-sdk 17.1.0 | Qué es |
+|---|---|
+| `@noble/ed25519`, `@noble/hashes` | JS puro, sin crypto nativo |
+| `@stellar/js-xdr` 5.0.0 | **cero dependencias**, ni una referencia a `Buffer` en `lib/` |
+| `@exodus/bytes`, `uint8array-extras` | todo sobre `Uint8Array` |
+
+La capa de cadena corre en RN con **un solo polyfill**, `react-native-get-random-values`. El
+costo de Expo no es la cadena: es el frontend, porque RN no tiene DOM y las cinco pantallas se
+reescriben.
+
+El usuario eligió **Expo**, y el motivo que dio ordena el resto del proyecto: *"quiero hacer la
+prueba de hasta qué punto te puedo encargar una app móvil"*, con el tiempo explícitamente
+fuera de la ecuación. Con Capacitor la app parece nativa; con Expo lo es. iOS queda fuera:
+compilar para iPhone necesita una Mac.
+
+#### Lo que el entorno ya tiene y lo que falta
+
+Node 24.14.0, npm 11.9.0 y **JDK 21.0.11 ya instalado**. No hay Android SDK ni `adb`, así que
+el build sale por **EAS en la nube** —que pide una cuenta de Expo del usuario— o instalando el
+SDK local. Es la primera pregunta de la próxima sesión.
+
+Las bases del hackathon no se pudieron leer: `demo.stellarpassport.xyz` es un SPA de Next.js
+que trae el contenido por JS, y el HTML servido es sólo el shell. Quedó pendiente que el
+usuario las pegue.
+
+#### Dos encargos que el usuario dejó anotados
+
+Los dos son para resolver al empezar la app, no ahora: **decidir la arquitectura y los
+patrones de diseño antes de escribir la primera línea** —el pedido textual fue *"quiero una
+buena escritura y arquitectura de código"*, o sea que la estructura se piensa, no se descubre
+mientras crece—, y **evaluar apoyarse en Claude Design** para alguna parte del port de las
+pantallas. Quedaron como preguntas 7 y 8 de [plan.md](plan.md).
+
+#### Estado
+
+Nada de código escrito, nada commiteado salvo estos docs. La cadena sigue igual que ayer: dos
+contratos desplegados, 22 tests verdes, los dos smoke tests en `TODO OK`. Lo que cambió es el
+plan: **F3 se redefine** —firmante rotativo, app Expo, hosting— y el alcance pasa de "cablear
+dos pantallas web" a "una app Android de verdad". Las tres quests de Santiago siguen sin
+decidir por elección del usuario; se sigue con placeholders.
+
+---
 
 ### Sesión: 2026-09-16 (Sesión 2) — Del contenedor al PC, y los contratos a la red
 
