@@ -47,15 +47,24 @@ testnet**: `node scripts/smoke-testnet.mjs` los corre de punta a punta y sale
   secretos quedan en `.env` (gitignoreado), las publicas van on-chain.
 - IDs en `deployments/testnet.json`. Verificado leyendo el estado de la red.
 
-### F3 - Firmante y cableado — **lo que sigue**
-- Adapter SSR de Astro (node).
-- `POST /api/location/challenge` emite nonce con expiracion.
+### F3 - Firmante y cableado — **backend hecho, falta la app**
+
+Hecho, sin tocar ninguna pantalla:
+- Adapter `@astrojs/node`. Las paginas siguen prerenderizadas; solo `/api` corre
+  en el servidor.
+- `POST /api/location/challenge` emite un nonce de un solo uso, 5 min de vida,
+  atado a su quest.
 - `POST /api/location/sign` valida el nonce y firma `quest_id || nonce || address`.
-  La logica de firma ya esta escrita y probada en `scripts/smoke-testnet.mjs`.
+  La address la codifica el servidor.
 - Llaves ed25519 por quest desde `.env`. **Nunca en el repo.**
+- `scripts/smoke-signer.mjs` levanta el build, hace el handshake y acuña con esa
+  firma contra testnet.
+
+Falta:
 - `scan.astro`: leer QR -> challenge -> firma -> transaccion.
 - `wallet.astro`: balance real leido del contrato.
-- Wallet del usuario: keypair en el navegador (decision cerrada, demo).
+- Wallet del usuario: keypair en el navegador (decision cerrada, demo); falta
+  definir donde vive (ver pregunta 2).
 
 **Listo cuando:** el recorrido completo funciona desde la app, no desde un script.
 

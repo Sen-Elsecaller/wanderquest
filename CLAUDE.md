@@ -24,10 +24,12 @@ Marca el estado real de cada pieza: `escrito` / `compila` / `testeado` / `deploy
   canje con fee/quema. Estado: **desplegado en testnet, 11 tests pasan**.
 - **Deploy** — `deployments/testnet.json` tiene los IDs. `scripts/deploy-testnet.ps1` rehace todo
   de cero; `scripts/smoke-testnet.mjs` corre el recorrido completo y los 3 ataques contra la red.
-- **Frontend** — landing + 5 pantallas mock. Estado: **hecho, sin cablear a cadena**. Es lo que
-  sigue (F3).
-- **Backend firmante** — no existe todavía (F3). Las llaves ed25519 de las 3 ubicaciones ya están
-  generadas en `.env` (gitignoreado) y sus públicas registradas on-chain.
+- **Backend firmante** — `POST /api/location/challenge` y `POST /api/location/sign` (Astro con
+  adapter node; solo `/api` es SSR, las páginas siguen estáticas). Estado: **funciona contra
+  testnet** — `npm run smoke:signer`. Las llaves ed25519 de las 3 ubicaciones viven en `.env`
+  (gitignoreado); sus públicas están registradas on-chain.
+- **Frontend** — landing + 5 pantallas mock. Estado: **hecho, sin cablear a cadena**. Es lo único
+  que falta de F3 y lo primero que toca diseño.
 - **Toolchain** — todo corre en el PC del usuario (Windows): Rust 1.98.1 host `x86_64-pc-windows-gnu`,
   target `wasm32v1-none`, `stellar-cli` 28.0.0, Node 24. No hay MSVC Build Tools; ver la nota del
   linker en la skill. MCP `stellar-raven` no está conectado a la sesión (el host sí responde).
@@ -123,6 +125,8 @@ wanderquest/
 │   ├── components/landing/   # Secciones de la landing
 │   ├── layouts/              # Layout (web) y AppLayout (app móvil)
 │   ├── pages/                # / (landing) y /app/* (5 pantallas)
+│   ├── pages/api/location/   # challenge + sign (SSR; el resto es estático)
+│   ├── lib/                  # location-signer (server only: llaves ed25519)
 │   └── styles/global.css     # Tailwind v4 (@theme) + estilos app
 ├── contracts/                # Workspace Rust/Soroban
 │   ├── Cargo.toml            # workspace + perfil release para Wasm
@@ -130,7 +134,7 @@ wanderquest/
 │   ├── .cargo/config.toml    # flag del linker mingw (ver skill)
 │   ├── wq-token/             # token WQ
 │   └── quest-manager/        # verificación de visita + acuñación + canje
-├── scripts/                  # deploy, llaves de ubicación, smoke test en vivo
+├── scripts/                  # deploy, llaves de ubicación, smoke tests en vivo
 ├── deployments/testnet.json  # IDs desplegados — público, se commitea
 ├── .env                      # llaves ed25519 de ubicación — NUNCA se commitea
 ├── docs/                     # plan y bitácora

@@ -47,10 +47,20 @@ Contra la red (necesita [stellar-cli](https://developers.stellar.org/docs/tools/
 ```powershell
 node scripts/new-location-keys.mjs 3    # llaves de ubicación -> .env (nunca se commitea)
 pwsh scripts/deploy-testnet.ps1         # deploy + cableado + registro de quests
-node scripts/smoke-testnet.mjs          # el recorrido completo, en vivo
+npm run smoke                           # el recorrido completo, en vivo
+npm run build; npm run smoke:signer     # lo mismo pasando por el backend firmante
 ```
 
-`smoke-testnet.mjs` hace la visita verificada, el canje con su quema, y después intenta los tres ataques que tienen que fallar: prueba reusada, prueba emitida para otro usuario, y firma de otra llave.
+`npm run smoke` hace la visita verificada, el canje con su quema, y después intenta los tres ataques que tienen que fallar: prueba reusada, prueba emitida para otro usuario, y firma de otra llave.
+
+### El backend firmante
+
+| Ruta | Qué hace |
+|---|---|
+| `POST /api/location/challenge` | `{ quest_id }` -> nonce de un solo uso, 5 minutos de vida |
+| `POST /api/location/sign` | `{ quest_id, nonce, address }` -> firma sobre `quest_id \|\| nonce \|\| address` |
+
+Las páginas del sitio siguen siendo estáticas; solo estas dos rutas corren en el servidor. La clave secreta de cada ubicación se lee de `.env` y no sale del proceso.
 
 ## Stack
 

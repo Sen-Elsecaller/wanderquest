@@ -129,6 +129,14 @@ por alto entre el ruido del build.
   canje deja 0.95 al comercio y quema 0.05, y los tres ataques se rechazan en la
   red - reuso con `WasmVm, InvalidAction`, prueba ajena y firma falsa con
   `Crypto, InvalidInput`.
+- **Mitad de F3: el backend firmante.** Adapter `@astrojs/node` (la 11 pide Astro 7,
+  este proyecto esta en Astro 5: va la 9.5), `POST /api/location/challenge` y
+  `POST /api/location/sign` en `src/pages/api/`, con la logica en
+  `src/lib/location-signer.ts`. Nonce de un solo uso, 5 minutos de vida, atado a su
+  quest; la address la codifica el servidor, no el cliente. Las paginas siguen
+  siendo estaticas: solo `/api` se renderiza on-demand.
+  `scripts/smoke-signer.mjs` levanta el servidor construido, hace el handshake y
+  acuña con esa firma contra testnet: **TODO OK**. No se toco ninguna pantalla.
 
 ### Verificado
 
@@ -149,8 +157,16 @@ por alto entre el ruido del build.
 - Las 3 quests de Santiago se registraron sin decidir los lugares: el contrato solo
   guarda llave publica, recompensa y estado. El nombre y la foto son frontend.
 
+### Trampa del bundle
+
+`location-signer.ts` leia `.env` con una ruta relativa a `import.meta.url`. En
+`astro dev` andaba; despues del build el modulo vive en `dist/server/` y la ruta
+apunta a otro lado, asi que el firmante arrancaba sin ninguna llave y contestaba
+404 a todo. Se resuelve desde `process.cwd()`. Lo agarro `smoke-signer.mjs`
+justamente porque corre contra el build, no contra el dev server.
+
 ### Pendiente al cerrar
 
-F3: backend firmante (`/api/location/challenge` y `/sign`) y cablear `scan` y
-`wallet` a la cadena. La logica de firma ya esta escrita y probada en
-`scripts/smoke-testnet.mjs`; falta moverla a rutas de Astro con SSR.
+La otra mitad de F3: cablear `scan` y `wallet` a la cadena, y decidir como vive la
+wallet del usuario en el browser. Es lo primero que toca pantallas, asi que espera
+al usuario.

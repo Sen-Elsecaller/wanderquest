@@ -6,9 +6,12 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "smoke": "node scripts/smoke-testnet.mjs",
+    "smoke:signer": "node scripts/smoke-signer.mjs"
   },
   "dependencies": {
+    "@astrojs/node": "^9.5.5",
     "@stellar/stellar-sdk": "^17.1.0",
     "@tailwindcss/vite": "^4.2.1",
     "astro": "^5.17.1",
