@@ -1,172 +1,264 @@
-# Bitacora
+# Bitácora — WanderQuest
 
-Registro append-only de sesiones: que se decidio, que se verifico, que cambio.
-**Excepcion deliberada** a la regla de `.md` del `CLAUDE.md` ("referencia viva, no
-bitacora"): ese estilo aplica a los docs de referencia. Este archivo es historico -
-se agrega al final, no se reescribe.
+Registro de decisiones, hallazgos y contexto de sesión — orden **reverso-cronológico**
+(más reciente arriba), agrupado por semana. Acá va lo específico de cada sesión; el estado
+vivo del proyecto está en `CLAUDE.md`, el plan en [plan.md](plan.md), y cómo se verifica
+cada API de Soroban en la skill `.claude/skills/stellar-soroban/`.
+
+**Al inicio de sesión:** leer sólo las últimas 2 o 3 sesiones (las primeras del archivo).
+Para historial más viejo, buscar por texto o por tag.
+
+**Tags:** revisar esta lista antes de crear un tag nuevo — evitar sinónimos. Formato:
+kebab-case, sin tildes, a nivel sistema/módulo.
+
+`#contracts` `#token` `#quest-manager` `#sep-41` `#security` `#deploy` `#testnet`
+`#signer` `#frontend` `#tooling` `#docs` `#process-rules`
+
+**La fecha es la del día, y punto.** No se deduce de la última entrada ni se incrementa. Si
+ya hay una entrada de hoy, la nueva es `(Sesión 2)`, `(Sesión 3)` en el título. La semana se
+titula con su rango de fechas, no con un número de semana del proyecto: hubo seis meses entre
+el commit inicial y el trabajo real, y numerar desde marzo mentiría sobre el ritmo.
+
+**Si la fecha de hoy contradice lo que dice la última entrada, la equivocada es la entrada:**
+corregirla, no acomodar la nueva alrededor. `git log` la verifica.
 
 ---
 
-## 2026-09-16 - Retomar contexto, auditoria y plan
+## Semana 14 - 20 de septiembre
 
-**Estado al empezar:** la sesion arranco en frio. `master` tenia un solo commit
-(landing + prototipo) y el `CLAUDE.md` de marzo. El trabajo de la sesion anterior
-estaba en la rama `feat/onchain-contracts`, sin mergear.
+### Sesión: 2026-09-16 (Sesión 2) — Del contenedor al PC, y los contratos a la red
 
-### Hecho
+**Tags:** #contracts #token #quest-manager #sep-41 #security #deploy #testnet #signer #tooling #docs
 
-- Merge fast-forward de `feat/onchain-contracts` a `master` (`35d7ffb`). Ahi venian
-  los dos contratos Soroban y el `CLAUDE.md` con el objetivo nuevo.
-- **Primera compilacion real del workspace.** Resultados:
-  - `wq-token` compila; sus 4 tests pasan.
-  - `quest-manager` **no compila**: `error[E0583]`, `lib.rs:187` declara `mod test;`
-    y `src/test.rs` no existe.
-  - `soroban-sdk` resuelve a **27.0.6**. `env.events().publish()` esta **deprecado**;
-    la API actual es el macro `#[contractevent]`.
-- Commit de `contracts/Cargo.lock` (fija 27.0.6 y el arbol transitivo, para que el
-  build sea reproducible entre el contenedor y el PC del usuario) y de los
-  `test_snapshots` que genera el SDK (`773a442`).
-- Instalado el target `wasm32v1-none`.
-- Clonada la documentacion oficial completa en `/home/user/stellar/stellar-docs`
-  (991 archivos .md/.mdx, commit `0efbb05`).
+La sesión arrancó en el PC del usuario, no en el contenedor, y eso **dio vuelta la
+restricción que definía el plan entero**: la testnet responde, pero no había con qué compilar.
+Terminó con F0, F1 y F2 cerradas, los dos contratos vivos en testnet, y el recorrido completo
+—acuñar, canjear, y los tres ataques fallando— ocurriendo contra la red de verdad.
 
-### Verificado contra el SDK y la doc oficial
+El usuario pidió explícitamente trabajar solo: *"instala lo que tengas que instalar para yo
+hacer lo menos posible"*, *"ordena el proyecto como veas mejor"*.
 
-- `#[contractevent]` existe (`soroban-sdk/src/lib.rs:1056`).
-- `Address::to_payload()` **no sirve** para meter la address en un mensaje firmado:
-  esta tras `#[cfg(feature = "hazmat-address")]` y su propia doc desaconseja usarlo
-  para verificacion de firmas.
-- La via correcta es `ToXdr::to_xdr(self, env) -> Bytes` (`src/xdr.rs:48`), con impl
-  blanket para todo `T: IntoVal<Env, Val>`, o sea aplica a `Address`.
-- SEP-41 (`docs/tokens/token-interface.mdx`) exige `allowance`, `approve`,
-  `transfer_from`, `burn_from`; wq-token no los tiene. En 27.0.6 el `to` de
-  `transfer` es `MuxedAddress`.
+#### El entorno se dio vuelta
 
-### Hallazgos de auditoria
+| | Contenedor | PC del usuario |
+|---|---|---|
+| horizon / RPC / friendbot | 403 | **responden** |
+| `cargo`, target wasm | listos | **no existían** |
+| `stellar-cli` | por instalar | **no existía** |
+| doc oficial, SDK vendorizado | en disco | **no estaban** |
 
-- **Front-running real.** La firma iba sobre `quest_id || nonce`, sin decir para
-  quien. Cualquiera que la viera podia cobrarla. El ataque practico no es sofisticado:
-  compartir la firma por mensajeria y que gane el primero en subirla.
-- **La llave de ubicacion.** El docstring ofrecia tres arquitecturas (llave en el QR /
-  en tag NFC / en backend). Las dos primeras exponen la llave secreta: quien fotografia
-  el QR acuña desde su casa para siempre. Eso no es una limitacion de MVP, rompe el CPVV.
-- Instance storage sin bump de TTL en ambos contratos.
-- `redeem` necesita que la firma del usuario cubra tres nodos del arbol de auth
-  (`redeem`, `transfer`, `burn`). Punto tipico de falla.
+Instalado: Rust 1.98.1, `stellar-cli` 28.0.0 por winget, la doc oficial clonada, y del lado
+JS `@stellar/stellar-sdk` 17.
 
-### Restriccion de entorno descubierta
+**El host es el toolchain GNU y no MSVC**, porque el usuario pidió no bajarse Visual Studio
+Build Tools. El costo aparece enseguida: un contrato Soroban se compila también como `cdylib`
+para el host durante `cargo test`, el linker de mingw exporta todo símbolo público y
+**desborda su límite de 65535 ordinales** con este árbol de dependencias. La salida es una
+línea en `contracts/.cargo/config.toml`:
 
-El contenedor **no alcanza la testnet**: 403 en `horizon-testnet.stellar.org`,
-`soroban-testnet.stellar.org` y `friendbot.stellar.org`. Tambien bloqueados
-`developers.stellar.org` (resuelto clonando la doc), `stellarpassport.xyz`,
-`dorahacks.io` y el MCP `stellar-raven` (`raven.stellar.buzz`). Compilar y testear
-se hace aca; **desplegar no**.
+```toml
+rustflags = ["-C", "link-arg=-Wl,--exclude-all-symbols"]
+```
 
-### Decisiones tomadas
+Nadie carga esa DLL —los tests usan el `rlib`—, así que no exportar nada es gratis. El wasm
+ni se entera: usa `rust-lld`.
 
-- **Meta:** top 3 del hackathon al 30 de septiembre. No se optimiza para escalar
-  despues; si va bien, se escala despues.
-- **Arquitectura de verificacion: challenge-response con backend firmante.** El QR
-  lleva `quest_id` + nonce rotativo; la llave nunca sale del servidor; se firma
-  incluyendo la address del usuario. Resuelve exposicion de llave, replay e
-  intransferibilidad de una vez.
-- **Se aplica el fix de front-running** (consecuencia de lo anterior).
-- **Modelo de trabajo:** el agente escribe, compila, testea e itera en el contenedor.
-  El usuario revisa y corre el deploy. Reemplaza la regla previa de "no compilo yo".
+#### El bug que habría roto el deploy en el primer comando
+
+F0 terminó, los tests en verde, y el build a wasm tiró **un warning entre cuarenta líneas de
+ruido**: `function signature mismatch: initialize`. Mirar los exports del wasm en vez de
+seguir de largo fue lo que salvó la sesión:
+
+```
+quest_manager (18 exports): _, admin, balance, burn, complete_quest, decimals,
+get_quest, memory, mint, name, owner, redeem, register_quest, set_quest_active,
+symbol, token, total_supply, transfer
+```
+
+Dos cosas mal, y la segunda es fatal: el manager exportaba `mint`, `burn` y `transfer` —que
+son del token—, y **`initialize` no estaba**. El deploy habría fallado en el primer comando
+después de subir el wasm.
+
+La causa: `quest-manager` tenía `wq-token = { path = "../wq-token" }` en `[dependencies]`
+sólo para usar `WQTokenClient`. Eso linkea los `#[contractimpl]` del token dentro del wasm
+del manager; los dos `initialize` tienen distinta aridad, colisionan, y el linker se come
+uno.
+
+La forma correcta de llamar a otro contrato es **no depender de su crate**, sino declarar la
+interfaz que se le va a pedir:
+
+```rust
+#[contractclient(name = "TokenClient")]
+pub trait TokenInterface {
+    fn mint(env: Env, to: Address, amount: i128);
+}
+```
+
+`wq-token` quedó como `dev-dependency` para los tests. El wasm bajó de 18 exports a sus 10
+legítimos y de 22.804 a 16.528 bytes. **La regla quedó en la skill: después de tocar
+dependencias entre contratos, mirar los exports.**
+
+#### SEP-41: implementar el trait del SDK en vez de copiarlo
+
+`soroban_sdk::token::TokenInterface` es un `#[contracttrait]`. Implementarlo hace que las
+firmas las garantice el SDK y no un copiado a mano de la doc — que era justo el riesgo, porque
+en 27.0.6 el `to` de `transfer` es `MuxedAddress` y eso es fácil de pasar por alto.
+
+Lo que no es parte de la interfaz —`initialize`, `mint`, `admin`, `total_supply`— vive en un
+bloque aparte. Los dos `#[contractimpl]` alimentan el mismo `WQTokenClient`, así que desde
+afuera se ve un solo contrato.
+
+Las allowances van en storage **temporal**, con el TTL de la entrada igual al vencimiento del
+permiso: la entrada muere sola cuando el permiso muere. Y una allowance vencida se lee como
+cero aunque el host todavía no la haya archivado, que es lo que evita que el borde dependa de
+cuándo pasa el recolector.
+
+#### El TTL, que es lo que decide si la demo existe el día 30
+
+Ninguno de los dos contratos extendía su `instance` storage. Un contrato archivado **deja de
+responder**, así que la demo se moría sola con el tiempo. Ahora cada función que escribe
+extiende la instancia —que cubre instancia y código—, las quests y los nonces usados extienden
+su entrada, y los balances ya lo hacían.
+
+Un detalle que vale por sí solo: **una entrada `persistent` archivada no se puede recrear,
+sólo restaurar** (`state-archival.mdx`). O sea que el registro de nonces gastados sobrevive a
+su propio TTL: el anti-replay no depende del bump, el bump sólo le ahorra a alguien el trámite
+de restaurar.
+
+#### El deploy, y la prueba que importa
+
+`scripts/deploy-testnet.ps1` hace todo de una corrida: build, deploy de los dos, QuestManager
+como único admin del token, y registro de las tres quests cuyas llaves de firma salen de
+`.env`.
+
+- WQToken `CC4LXDWGXJ4GSJNHLMM3RJOYSSK2TSQ5M7BFQMBVT7UDX63C34UJIDL5`
+- QuestManager `CABDQUAZM65KCFI5H7636HRZLSKOT27DUG6Y5IUPTHG6GD6YPSGHWTFL`
+
+Pero el deploy no prueba nada por sí solo. `scripts/smoke-testnet.mjs` camina el recorrido
+entero con una cuenta descartable y después **intenta los tres ataques**:
+
+| | Resultado en la red |
+|---|---|
+| Visita verificada | acuña 5 WQ |
+| Canje de 1 WQ | 0.95 al comercio, 0.05 quemado |
+| Prueba reusada | `Error(WasmVm, InvalidAction)` |
+| Prueba emitida para otro usuario | `Error(Crypto, InvalidInput)` |
+| Firma de otra llave | `Error(Crypto, InvalidInput)` |
+
+De paso confirmó lo que F3 necesitaba y nadie había verificado: **el XDR que produce
+`Address.fromString(g).toScVal().toXDR()` en el JS SDK es byte a byte el que
+`user.to_xdr(&env)` reconstruye adentro del contrato**. Si no coincidieran, el backend
+firmante firmaría algo que la cadena no reconoce, y el síntoma sería una firma inválida sin
+ninguna pista de por qué.
+
+#### El backend firmante, y la trampa del bundle
+
+Con tiempo de sobra se hizo la mitad de F3 que no toca ninguna pantalla: adapter
+`@astrojs/node` —la 11 pide Astro 7 y el proyecto está en Astro 5, así que va la 9.5— y dos
+rutas, `POST /api/location/challenge` y `POST /api/location/sign`. Las páginas siguen
+prerenderizadas; sólo `/api` corre en el servidor.
+
+Dos decisiones chicas que importan: **el nonce se gasta antes de firmar** —una prueba se emite
+una sola vez, pase lo que pase después— y **la address la codifica el servidor**, no el
+cliente, que es exactamente lo que ata la prueba a quien la reclama.
+
+El bug de la parte: `location-signer.ts` leía `.env` con una ruta relativa a
+`import.meta.url`. Anda en `astro dev` y **se rompe después del build**, porque el módulo
+termina bundleado en `dist/server/` y la ruta apunta a otro lado. El firmante arrancaba sin
+ninguna llave y contestaba 404 a todo. Se resuelve desde `process.cwd()`. Lo agarró
+`smoke-signer.mjs` justamente porque corre contra el build y no contra el dev server — si el
+smoke test hubiera usado `astro dev`, el bug viajaba hasta la demo.
+
+#### Decisiones tomadas
+
+- **Rust queda en 4 espacios con rustfmt por defecto.** La preferencia de tabs del usuario
+  aplica al resto del proyecto; forzarla en Rust pelea con toda la herramienta.
+- **El deploy a testnet lo corre el agente.** La regla anterior decía "el deploy es del
+  usuario *mientras la testnet siga bloqueada acá*", y dejó de estarlo. Mainnet y fondos
+  reales siguen siendo del usuario.
+- **Las tres quests se registraron sin decidir los lugares.** El contrato sólo guarda llave
+  pública, recompensa y estado: el nombre, la foto y las coordenadas son frontend. Quedaron
+  con 5, 3 y 8 WQ.
+- **La bitácora pasa a formato reverso-cronológico**, el mismo de Little Big Potions.
+
+#### Estado
+
+22 tests unitarios verdes, clippy limpio, los dos wasm generados, los contratos desplegados y
+los dos smoke tests contra testnet en `TODO OK`. Cuatro commits pusheados a `master`
+(`4a5d4b7..d586f7e`).
+
+Falta la otra mitad de F3 —cablear `scan` y `wallet`— y ahí hay **dos preguntas para el
+usuario**: los tres lugares de Santiago, y dónde vive la wallet del usuario en el browser
+(keypair en `localStorage`, o pegar una secreta de testnet). Las dos están al final de
+[plan.md](plan.md).
+
+---
+
+### Sesión: 2026-09-16 — Retomar contexto, auditoría y plan
+
+**Tags:** #contracts #security #docs #process-rules
+
+La sesión arrancó en frío: `master` tenía un solo commit —landing y prototipo— y el
+`CLAUDE.md` de marzo. El trabajo de la sesión anterior estaba en `feat/onchain-contracts`, sin
+mergear.
+
+#### Primera compilación real del workspace
+
+Merge fast-forward de la rama a `master` (`35d7ffb`), y recién ahí se supo qué había:
+
+- `wq-token` compila; sus 4 tests pasan.
+- `quest-manager` **no compila**: `error[E0583]`, `lib.rs:187` declara `mod test;` y
+  `src/test.rs` no existe.
+- `soroban-sdk` resuelve a **27.0.6**, y `env.events().publish()` está **deprecado**.
+
+Se commiteó `contracts/Cargo.lock` a propósito —fija 27.0.6 y todo el árbol transitivo, para
+que el build sea reproducible entre máquinas— junto con los `test_snapshots` que genera el SDK
+(`773a442`). Instalado el target `wasm32v1-none` y clonada la documentación oficial completa
+(991 archivos `.md`/`.mdx`).
+
+#### Verificado contra el SDK y la doc, no de memoria
+
+- `#[contractevent]` existe (`soroban-sdk/src/lib.rs:1056`) y es la API actual de eventos.
+- `Address::to_payload()` **no sirve** para meter la address en un mensaje firmado: está tras
+  `#[cfg(feature = "hazmat-address")]` y su propia doc desaconseja usarlo para verificación de
+  firmas.
+- La vía correcta es `ToXdr::to_xdr(self, env) -> Bytes` (`src/xdr.rs:48`), con impl blanket
+  para todo `T: IntoVal<Env, Val>`, o sea aplica a `Address`.
+- SEP-41 (`docs/tokens/token-interface.mdx`) exige `allowance`, `approve`, `transfer_from` y
+  `burn_from`, que wq-token no tenía. En 27.0.6 el `to` de `transfer` es `MuxedAddress`.
+
+#### Hallazgos de auditoría
+
+- **Front-running real.** La firma iba sobre `quest_id || nonce`, sin decir para quién.
+  Cualquiera que la viera podía cobrarla, y el ataque práctico no es sofisticado: compartir la
+  firma por mensajería y que gane el primero en subirla.
+- **La llave de ubicación.** El docstring ofrecía tres arquitecturas —llave en el QR, en tag
+  NFC, o en backend—. Las dos primeras exponen la llave secreta: quien fotografía el QR acuña
+  desde su casa para siempre. Eso no es una limitación de MVP, rompe el CPVV entero.
+- Instance storage sin bump de TTL en los dos contratos.
+- `redeem` necesita que la firma del usuario cubra tres nodos del árbol de auth (`redeem`,
+  `transfer`, `burn`). Punto típico de falla.
+
+#### La restricción que definió el plan
+
+El contenedor **no alcanzaba la testnet**: 403 en `horizon-testnet.stellar.org`,
+`soroban-testnet.stellar.org` y `friendbot.stellar.org`. También bloqueados
+`developers.stellar.org` —resuelto clonando la doc—, `stellarpassport.xyz`, `dorahacks.io` y
+el MCP `stellar-raven`. Compilar y testear se podía; desplegar no.
+
+#### Decisiones tomadas
+
+- **Meta:** top 3 del hackathon al 30 de septiembre. No se optimiza para escalar después.
+- **Arquitectura de verificación: challenge-response con backend firmante.** El QR lleva
+  `quest_id` y un nonce rotativo; la llave nunca sale del servidor; se firma incluyendo la
+  address del usuario. Resuelve exposición de llave, replay e intransferibilidad de una vez.
+- **Se aplica el fix de front-running**, que es consecuencia de lo anterior.
+- **Modelo de trabajo:** el agente escribe, compila, testea e itera. El usuario revisa.
+  Reemplaza la regla previa de "no compilo yo".
 - **Rama:** se trabaja directo sobre `master`.
-- Regla de reutilizacion del hackathon: **descartada como riesgo** por el usuario.
-  Lo que se reusa es el concepto; el valor esta en llevarlo a cabo.
+- La regla de reutilización del hackathon quedó **descartada como riesgo** por el usuario: lo
+  que se reusa es el concepto, y el valor está en llevarlo a cabo.
 
-### Pendiente al cerrar
+#### Estado
 
-F0 del plan (`docs/plan.md`): escribir `quest-manager/src/test.rs` y dejar el
-workspace compilando entero.
-
----
-
-## 2026-09-16 (tarde) - Del contenedor al PC: F0, F1 y F2 en una sesion
-
-**Cambio de entorno.** La sesion arranco en el PC del usuario (Windows), no en el
-contenedor. Se invirtio la restriccion: la testnet **responde** (horizon, RPC y
-friendbot), pero no habia toolchain. Instalado en la maquina: Rust 1.98.1 con host
-`x86_64-pc-windows-gnu` y target `wasm32v1-none`, `stellar-cli` 28.0.0 por winget,
-la doc oficial clonada en `~/stellar/stellar-docs`, y `@stellar/stellar-sdk` 17.
-
-No hay MSVC Build Tools y el usuario pidio no instalar 6 GB de Visual Studio, asi
-que el host es GNU. Su linker desborda el limite de 65535 ordinales al exportar el
-`cdylib` de un contrato: `contracts/.cargo/config.toml` pasa
-`-C link-arg=-Wl,--exclude-all-symbols` y con eso `cargo test` linkea. El wasm no
-pasa por ahi.
-
-### Bug serio, encontrado antes de desplegar
-
-`quest-manager` dependia del crate `wq-token` solo para usar su cliente. Eso linkea
-los `#[contractimpl]` del token dentro del wasm del manager: `quest_manager.wasm`
-exportaba `mint`, `burn` y `transfer`, y los dos `initialize` (de distinta aridad)
-colisionaban, asi que el linker **borro el del manager**. El contrato no se podia
-inicializar; el deploy habria fallado en el primer comando.
-
-Arreglo: declarar la interfaz con `#[contractclient]` y dejar `wq-token` como
-`dev-dependency`. `quest_manager.wasm` paso de 18 exports a 10, los suyos.
-
-**Leccion, ya en la skill:** despues de tocar dependencias entre contratos, mirar
-los exports del wasm. El warning del linker era la unica pista y era facil de pasar
-por alto entre el ruido del build.
-
-### Hecho
-
-- **F0:** `quest-manager/src/test.rs` escrito (11 tests con firmas ed25519 reales),
-  eventos migrados a `#[contractevent]`, wasm limpio.
-- **F1:** firma atada al usuario; SEP-41 completo implementando
-  `token::TokenInterface` del SDK (allowances en storage temporal que vence junto
-  con el permiso); TTL en instance, quests, nonces y balances. 22 tests verdes,
-  clippy limpio.
-- **F2:** desplegado en testnet. `scripts/deploy-testnet.ps1` lo rehace de cero.
-  - WQToken `CC4LXDWGXJ4GSJNHLMM3RJOYSSK2TSQ5M7BFQMBVT7UDX63C34UJIDL5`
-  - QuestManager `CABDQUAZM65KCFI5H7636HRZLSKOT27DUG6Y5IUPTHG6GD6YPSGHWTFL`
-  - 3 quests registradas (5, 3 y 8 WQ), llaves de ubicacion en `.env`.
-- **Prueba en vivo** (`scripts/smoke-testnet.mjs`): visita verificada acuña 5 WQ,
-  canje deja 0.95 al comercio y quema 0.05, y los tres ataques se rechazan en la
-  red - reuso con `WasmVm, InvalidAction`, prueba ajena y firma falsa con
-  `Crypto, InvalidInput`.
-- **Mitad de F3: el backend firmante.** Adapter `@astrojs/node` (la 11 pide Astro 7,
-  este proyecto esta en Astro 5: va la 9.5), `POST /api/location/challenge` y
-  `POST /api/location/sign` en `src/pages/api/`, con la logica en
-  `src/lib/location-signer.ts`. Nonce de un solo uso, 5 minutos de vida, atado a su
-  quest; la address la codifica el servidor, no el cliente. Las paginas siguen
-  siendo estaticas: solo `/api` se renderiza on-demand.
-  `scripts/smoke-signer.mjs` levanta el servidor construido, hace el handshake y
-  acuña con esa firma contra testnet: **TODO OK**. No se toco ninguna pantalla.
-
-### Verificado
-
-- `Address.fromString(g).toScVal().toXDR()` del JS SDK produce **los mismos bytes**
-  que `user.to_xdr(&env)` en el contrato. Lo prueba el mint en vivo.
-- En los tests, `env.events().all()` solo trae los eventos de la ultima invocacion:
-  leerlos antes de cualquier otra llamada.
-- Una entrada `persistent` archivada no se puede recrear, solo restaurar
-  (`state-archival.mdx`), asi que el registro de nonces sobrevive a su TTL.
-- `instance().extend_ttl()` extiende instancia **y codigo**.
-
-### Decisiones tomadas
-
-- **Rust queda en 4 espacios con rustfmt por defecto.** La preferencia de tabs del
-  usuario aplica al resto; forzarla en Rust pelea con toda la herramienta.
-- **El deploy a testnet lo corre el agente**, ya que la red es alcanzable. Mainnet y
-  fondos reales siguen siendo del usuario.
-- Las 3 quests de Santiago se registraron sin decidir los lugares: el contrato solo
-  guarda llave publica, recompensa y estado. El nombre y la foto son frontend.
-
-### Trampa del bundle
-
-`location-signer.ts` leia `.env` con una ruta relativa a `import.meta.url`. En
-`astro dev` andaba; despues del build el modulo vive en `dist/server/` y la ruta
-apunta a otro lado, asi que el firmante arrancaba sin ninguna llave y contestaba
-404 a todo. Se resuelve desde `process.cwd()`. Lo agarro `smoke-signer.mjs`
-justamente porque corre contra el build, no contra el dev server.
-
-### Pendiente al cerrar
-
-La otra mitad de F3: cablear `scan` y `wallet` a la cadena, y decidir como vive la
-wallet del usuario en el browser. Es lo primero que toca pantallas, asi que espera
-al usuario.
+F0 pendiente: escribir `quest-manager/src/test.rs` y dejar el workspace compilando entero.

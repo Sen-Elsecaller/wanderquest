@@ -103,7 +103,11 @@ El resto de preguntas abiertas, al final de `docs/plan.md`.
 
 Documentación de referencia viva, no bitácora. Cuando algo cambia, **editar el texto existente
 in-place** y barrer el doc por lo que quedó desactualizado — no acumular secciones por sesión.
-**Excepción: `docs/bitacora.md`** es histórico y append-only; ahí sí se agrega por sesión.
+
+**Excepción: `docs/bitacora.md`** es histórico. Va en **orden reverso-cronológico** (lo más
+reciente arriba), agrupado por semana, una sección por sesión: título con fecha, tags, y prosa
+que cuenta **por qué** se hizo cada cosa, no un listado de qué se tocó. Cierra con `#### Estado`.
+Sus propias reglas de formato están en su cabecera — leerlas antes de escribir una entrada.
 
 ### `CLAUDE.md` es instrucciones + router, no la enciclopedia
 
@@ -112,7 +116,7 @@ Se carga entero en cada turno. El detalle profundo vive en su propio archivo:
 | Dónde | Qué |
 |---|---|
 | `docs/plan.md` | Plan al 2026-09-30, fases, riesgos, preguntas abiertas |
-| `docs/bitacora.md` | Histórico de sesiones: decisiones, verificaciones, hallazgos |
+| `docs/bitacora.md` | Histórico de sesiones (más reciente arriba): decisiones, hallazgos, por qué |
 | `.claude/skills/stellar-soroban/` | Cómo verificar APIs de Soroban y qué cambió en 27.x |
 
 ---
